@@ -1,11 +1,6 @@
 ## Quick Start (From Scratch)
 
-If this is your first time running the project:
-
 ```
-$ git clone <repo-url>
-$ cd metadata-visualizer
-$ nvm install 22
 $ nvm use
 $ corepack enable
 $ yarn install
