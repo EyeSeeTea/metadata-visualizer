@@ -4,6 +4,7 @@ import { resourceTypeLabels } from "$/domain/metadata/ResourceType";
 import { IdenticonAvatar } from "$/webapp/components/metadata/IdenticonAvatar";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import CenterFocusStrongIcon from "@material-ui/icons/CenterFocusStrong";
+import i18n from "$/utils/i18n";
 
 type MetadataGraphViewProps = {
     graph: MetadataGraph;
@@ -214,7 +215,7 @@ const GraphNodeCard: React.FC<{
                         <button
                             type="button"
                             className="graph-node__action"
-                            title="Open API"
+                            title={i18n.t("Open API")}
                             onClick={() => onOpenApi?.(node)}
                         >
                             <OpenInNewIcon fontSize="small" />
@@ -222,7 +223,7 @@ const GraphNodeCard: React.FC<{
                         <button
                             type="button"
                             className="graph-node__action"
-                            title="Focus in graph"
+                            title={i18n.t("Focus in graph")}
                             onClick={() => onFocus?.(node)}
                         >
                             <CenterFocusStrongIcon fontSize="small" />

@@ -7,6 +7,7 @@ import {
     MetadataGraph,
     graphNodeKey,
 } from "$/domain/metadata/MetadataGraph";
+import { resourceTypeLabels } from "$/domain/metadata/ResourceType";
 import { MetadataItem, MetadataList } from "$/domain/metadata/MetadataItem";
 import { useAppContext } from "$/webapp/contexts/app-context";
 import { MetadataGraphView } from "$/webapp/components/metadata/MetadataGraphView";
@@ -109,12 +110,14 @@ export const MetadataGraphPanel: React.FC<MetadataGraphPanelProps> = ({
 
     if (!selectedItem) {
         return (
-            <div className="metadata-graph__placeholder">Select a row to view relationships.</div>
+            <div className="metadata-graph__placeholder">
+                {i18n.t("Select a row to view relationships.")}
+            </div>
         );
     }
 
     if (graphState.type === "loading") {
-        return <div className="metadata-graph__placeholder">Loading graph...</div>;
+        return <div className="metadata-graph__placeholder">{i18n.t("Loading graph...")}</div>;
     }
 
     if (graphState.type === "error") {
@@ -135,12 +138,12 @@ export const MetadataGraphPanel: React.FC<MetadataGraphPanelProps> = ({
 
     const lazyButtonLabel =
         cocState.type === "loading"
-            ? "Loading..."
+            ? i18n.t("Loading...")
             : cocState.type === "idle"
-            ? "Load combos"
+            ? i18n.t("Load combos")
             : cocCanLoadMore
-            ? "Load more"
-            : "All loaded";
+            ? i18n.t("Load more")
+            : i18n.t("All loaded");
 
     const handleOpenApi = (node: GraphNode) => {
         const link = buildApiLink(baseUrl, node.type, node.id);
@@ -193,7 +196,8 @@ export const MetadataGraphPanel: React.FC<MetadataGraphPanelProps> = ({
             {lazyCombo && (
                 <div className="metadata-graph__lazy">
                     <div className="metadata-graph__lazy-header">
-                        Category option combos {cocTotal !== undefined ? `(${cocTotal})` : ""}
+                        {resourceTypeLabels.categoryOptionCombos}{" "}
+                        {cocTotal !== undefined ? `(${cocTotal})` : ""}
                     </div>
                     {cocState.type === "error" && (
                         <div className="metadata-graph__lazy-error">{cocState.error?.message}</div>
@@ -273,7 +277,7 @@ function mergeCategoryOptionCombos(graph: MetadataGraph, combos: MetadataItem[])
     const filteredGroups = graph.groups.filter(group => group.id !== groupId);
     const group: GraphGroup = {
         id: groupId,
-        title: "Category option combos",
+        title: resourceTypeLabels.categoryOptionCombos,
         nodeKeys: newNodes.map(node => node.key),
         direction: "child",
     };

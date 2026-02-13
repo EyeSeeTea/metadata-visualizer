@@ -14,6 +14,7 @@ import { AppContext, AppContextState } from "$/webapp/contexts/app-context";
 import { MetadataExplorerPage } from "$/webapp/pages/metadata/MetadataExplorerPage";
 import { configI18n } from "$/webapp/utils/i18n-setup";
 import { buildInfo } from "$/utils/build-info";
+import i18n from "$/utils/i18n";
 import "./App.css";
 import muiThemeLegacy from "./themes/dhis2-legacy.theme";
 import { muiTheme } from "./themes/dhis2.theme";
@@ -54,7 +55,7 @@ function App_(_props: {}) {
         <MuiThemeProvider theme={muiTheme}>
             <OldMuiThemeProvider muiTheme={muiThemeLegacy}>
                 <SnackbarProvider>
-                    <StyledHeaderBar appName="Metadata Visualizer" />
+                    <StyledHeaderBar appName={i18n.t("Metadata Visualizer")} />
 
                     {appConfig.feedback && appContext && (
                         <Feedback

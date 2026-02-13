@@ -5,13 +5,31 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2026-02-13T09:07:20.425Z\n"
-"PO-Revision-Date: 2026-02-13T09:07:20.425Z\n"
+"POT-Creation-Date: 2026-02-13T10:39:15.321Z\n"
+"PO-Revision-Date: 2026-02-13T10:39:15.321Z\n"
 
 msgid "Add"
 msgstr ""
 
 msgid "List"
+msgstr ""
+
+msgid "Select a row to view relationships."
+msgstr ""
+
+msgid "Loading graph..."
+msgstr ""
+
+msgid "Loading..."
+msgstr ""
+
+msgid "Load combos"
+msgstr ""
+
+msgid "Load more"
+msgstr ""
+
+msgid "All loaded"
 msgstr ""
 
 msgid "Visualization"
@@ -26,6 +44,12 @@ msgstr ""
 msgid "3D Timeline"
 msgstr ""
 
+msgid "Open API"
+msgstr ""
+
+msgid "Focus in graph"
+msgstr ""
+
 msgid "Colors"
 msgstr ""
 
@@ -35,10 +59,52 @@ msgstr ""
 msgid "Click to focus - Right click opens the API"
 msgstr ""
 
+msgid "Resource type"
+msgstr ""
+
+msgid "Fields"
+msgstr ""
+
+msgid "Filters (one per line or separated by ;)"
+msgstr ""
+
+msgid "Page"
+msgstr ""
+
+msgid "Page size"
+msgstr ""
+
+msgid "Fetch all (paging=false)"
+msgstr ""
+
+msgid "Fetch"
+msgstr ""
+
+msgid "No results"
+msgstr ""
+
+msgid "Avatar"
+msgstr ""
+
+msgid "item"
+msgstr ""
+
+msgid "object"
+msgstr ""
+
 msgid "Back"
 msgstr ""
 
 msgid "Help"
+msgstr ""
+
+msgid "Metadata Visualizer"
+msgstr ""
+
+msgid "Login {{baseUrl}}"
+msgstr ""
+
+msgid "Base URL not found in manifest.webapp (see DHIS2-19708)"
 msgstr ""
 
 msgid "Hello {{name}}"
@@ -48,4 +114,40 @@ msgid "Detail page"
 msgstr ""
 
 msgid "Section"
+msgstr ""
+
+msgid "Metadata views"
+msgstr ""
+
+msgid "Instance Metadata"
+msgstr ""
+
+msgid "JSON Package"
+msgstr ""
+
+msgid "Loading results..."
+msgstr ""
+
+msgid "{{total}} total"
+msgstr ""
+
+msgid "page {{page}} of {{pageCount}}"
+msgstr ""
+
+msgid "Fetching metadata..."
+msgstr ""
+
+msgid "Prev"
+msgstr ""
+
+msgid "Next"
+msgstr ""
+
+msgid "This tab will be used to upload and inspect metadata packages."
+msgstr ""
+
+msgid "Choose package (coming soon)"
+msgstr ""
+
+msgid "Next step - wire this tab to package parsing and preview before import."
 msgstr ""

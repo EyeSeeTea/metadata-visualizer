@@ -2,6 +2,7 @@ import React from "react";
 import { MetadataItem } from "$/domain/metadata/MetadataItem";
 import { ResourceType } from "$/domain/metadata/ResourceType";
 import { IdenticonAvatar } from "$/webapp/components/metadata/IdenticonAvatar";
+import i18n from "$/utils/i18n";
 
 type MetadataTableProps = {
     items: MetadataItem[];
@@ -21,14 +22,16 @@ export const MetadataTable: React.FC<MetadataTableProps> = ({
     const columns = React.useMemo(() => buildColumns(fields), [fields]);
 
     if (!items.length) {
-        return <div className="metadata-table__empty">No results</div>;
+        return <div className="metadata-table__empty">{i18n.t("No results")}</div>;
     }
 
     return (
         <table className="metadata-table">
             <thead>
                 <tr>
-                    <th className="metadata-table__cell metadata-table__cell--avatar">Avatar</th>
+                    <th className="metadata-table__cell metadata-table__cell--avatar">
+                        {i18n.t("Avatar")}
+                    </th>
                     {columns.map(column => (
                         <th key={column} className="metadata-table__cell">
                             {column}
@@ -97,7 +100,9 @@ function formatValue(value: unknown): string {
             .map(entry => {
                 if (entry && typeof entry === "object") {
                     const candidate = entry as { displayName?: string; name?: string; id?: string };
-                    return candidate.displayName ?? candidate.name ?? candidate.id ?? "[item]";
+                    return (
+                        candidate.displayName ?? candidate.name ?? candidate.id ?? i18n.t("item")
+                    );
                 }
                 return String(entry);
             })
@@ -107,7 +112,7 @@ function formatValue(value: unknown): string {
     }
     if (typeof value === "object") {
         const candidate = value as { displayName?: string; name?: string; id?: string };
-        return candidate.displayName ?? candidate.name ?? candidate.id ?? "[object]";
+        return candidate.displayName ?? candidate.name ?? candidate.id ?? i18n.t("object");
     }
     return String(value);
 }
