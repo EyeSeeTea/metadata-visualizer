@@ -5,13 +5,22 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2024-06-26T10:58:19.149Z\n"
-"PO-Revision-Date: 2024-06-26T10:58:19.149Z\n"
+"POT-Creation-Date: 2026-01-23T07:58:40.609Z\n"
+"PO-Revision-Date: 2026-01-23T07:58:40.609Z\n"
 
 msgid "Add"
 msgstr ""
 
 msgid "List"
+msgstr ""
+
+msgid "Colors"
+msgstr ""
+
+msgid "Textures"
+msgstr ""
+
+msgid "Click to focus - Right click opens the API"
 msgstr ""
 
 msgid "Back"
