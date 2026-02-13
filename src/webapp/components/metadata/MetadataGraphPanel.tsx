@@ -11,6 +11,7 @@ import { MetadataItem, MetadataList } from "$/domain/metadata/MetadataItem";
 import { useAppContext } from "$/webapp/contexts/app-context";
 import { MetadataGraphView } from "$/webapp/components/metadata/MetadataGraphView";
 import { MetadataGraphView3D } from "$/webapp/components/metadata/MetadataGraphView3D";
+import i18n from "$/utils/i18n";
 
 type MetadataGraphPanelProps = {
     selectedItem: MetadataItem | null;
@@ -154,7 +155,7 @@ export const MetadataGraphPanel: React.FC<MetadataGraphPanelProps> = ({
         <div className="metadata-graph__panel">
             <div className="metadata-graph__toolbar">
                 <label className="metadata-graph__toolbar-label" htmlFor="metadata-graph-view">
-                    Visualizacion
+                    {i18n.t("Visualization")}
                 </label>
                 <select
                     id="metadata-graph-view"
@@ -162,9 +163,9 @@ export const MetadataGraphPanel: React.FC<MetadataGraphPanelProps> = ({
                     value={graphView}
                     onChange={event => setGraphView(event.target.value as GraphViewMode)}
                 >
-                    <option value="layout2d">Vista 2D (actual)</option>
-                    <option value="force3d">Arbol 3D</option>
-                    <option value="timeline3d">Timeline 3D</option>
+                    <option value="layout2d">{i18n.t("2D View")}</option>
+                    <option value="force3d">{i18n.t("3D Tree")}</option>
+                    <option value="timeline3d">{i18n.t("3D Timeline")}</option>
                 </select>
             </div>
 

@@ -5,13 +5,25 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2026-01-23T07:58:40.609Z\n"
-"PO-Revision-Date: 2026-01-23T07:58:40.609Z\n"
+"POT-Creation-Date: 2026-02-13T09:07:20.425Z\n"
+"PO-Revision-Date: 2026-02-13T09:07:20.425Z\n"
 
 msgid "Add"
 msgstr ""
 
 msgid "List"
+msgstr ""
+
+msgid "Visualization"
+msgstr ""
+
+msgid "2D View"
+msgstr ""
+
+msgid "3D Tree"
+msgstr ""
+
+msgid "3D Timeline"
 msgstr ""
 
 msgid "Colors"
