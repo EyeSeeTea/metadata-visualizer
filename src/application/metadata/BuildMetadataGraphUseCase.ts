@@ -43,7 +43,7 @@ export class BuildMetadataGraphUseCase {
                 this.options.metadataRepository.get(
                     "dataElements",
                     id,
-                    "id,displayName,categoryCombo[id,displayName,categories[id,displayName,categoryOptions[id,displayName]]]"
+                    "id,displayName,categoryCombo[id,displayName,categories[id,displayName,categoryOptions[displayName]]]"
                 )
             )) as DataElement;
 
@@ -119,7 +119,7 @@ export class BuildMetadataGraphUseCase {
                 this.options.metadataRepository.get(
                     "categoryCombos",
                     id,
-                    "id,displayName,categories[id,displayName,categoryOptions[id,displayName]]"
+                    "id,displayName,categories[id,displayName,categoryOptions[displayName]]"
                 )
             )) as CategoryCombo;
 
@@ -189,7 +189,7 @@ export class BuildMetadataGraphUseCase {
                 this.options.metadataRepository.get(
                     "categories",
                     id,
-                    "id,displayName,categoryOptions[id,displayName]"
+                    "id,displayName,categoryOptions[displayName]"
                 )
             )) as Category;
 
@@ -359,7 +359,7 @@ export class BuildMetadataGraphUseCase {
                 this.options.metadataRepository.get(
                     "categoryOptionCombos",
                     id,
-                    "id,displayName,categoryCombo[id,displayName],categoryOptions[id,displayName]"
+                    "id,displayName,categoryCombo[displayName],categoryOptions[displayName]"
                 )
             )) as CategoryOptionCombo;
 
@@ -452,7 +452,7 @@ export class BuildMetadataGraphUseCase {
                 this.options.metadataRepository.get(
                     "dataSets",
                     id,
-                    "id,displayName,categoryCombo[id,displayName,categories[id,displayName,categoryOptions[id,displayName]]],dataSetElements[dataElement[id,displayName,categoryCombo[id,displayName]],categoryCombo[id,displayName]]"
+                    "id,displayName,categoryCombo[id,displayName,categories[id,displayName,categoryOptions[displayName]]],dataSetElements[dataElement[id,displayName,categoryCombo[displayName]],categoryCombo[displayName]]"
                 )
             )) as DataSet;
 
@@ -590,7 +590,7 @@ export class BuildMetadataGraphUseCase {
                     categoryCombos.map(combo =>
                         this.options.metadataRepository.list({
                             type: "dataSets",
-                            fields: "id,displayName,categoryCombo[id,displayName],dataSetElements[dataElement[id,displayName,categoryCombo[id,displayName]],categoryCombo[id,displayName]]",
+                            fields: "id,displayName,categoryCombo[displayName],dataSetElements[dataElement[id,displayName,categoryCombo[displayName]],categoryCombo[displayName]]",
                             filters: [`categoryCombo.id:eq:${combo.id}`],
                             paging: false,
                         })
@@ -610,7 +610,7 @@ export class BuildMetadataGraphUseCase {
                     dataElements.map(element =>
                         this.options.metadataRepository.list({
                             type: "dataSets",
-                            fields: "id,displayName,categoryCombo[id,displayName],dataSetElements[dataElement[id,displayName,categoryCombo[id,displayName]],categoryCombo[id,displayName]]",
+                            fields: "id,displayName,categoryCombo[displayName],dataSetElements[dataElement[id,displayName,categoryCombo[displayName]],categoryCombo[displayName]]",
                             filters: [`dataSetElements.dataElement.id:eq:${element.id}`],
                             paging: false,
                         })

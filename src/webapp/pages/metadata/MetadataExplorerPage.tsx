@@ -12,12 +12,12 @@ import { MetadataGraphPanel } from "$/webapp/components/metadata/MetadataGraphPa
 import "./MetadataExplorerPage.css";
 
 const defaultFieldsByType: Record<ResourceType, string> = {
-    dataElements: "id,displayName,categoryCombo[id,displayName]",
-    dataSets: "id,displayName,categoryCombo[id,displayName]",
-    categories: "id,displayName,categoryOptions[id,displayName]",
-    categoryCombos: "id,displayName,categories[id,displayName]",
+    dataElements: "id,displayName,categoryCombo[displayName]",
+    dataSets: "id,displayName,categoryCombo[displayName]",
+    categories: "id,displayName,categoryOptions[displayName]",
+    categoryCombos: "id,displayName,categories[displayName]",
     categoryOptions: "id,displayName",
-    categoryOptionCombos: "id,displayName,categoryCombo[id,displayName]",
+    categoryOptionCombos: "id,displayName,categoryCombo[displayName]",
 };
 
 const initialQuery: MetadataQueryState = {
