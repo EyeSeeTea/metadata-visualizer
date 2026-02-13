@@ -1,23 +1,346 @@
 import { MetadataGraph } from "$/domain/metadata/MetadataGraph";
-import { ResourceType } from "$/domain/metadata/ResourceType";
 
 type JsonRecord = Record<string, unknown>;
 
 const typePriorityOrder = [
+    "attributes",
+    "categoryOptionGroupSets",
+    "categoryOptionGroups",
     "categoryOptionCombos",
     "categoryOptions",
     "categoryCombos",
     "categories",
+    "dataElementGroups",
     "dataElements",
+    "indicatorTypes",
+    "indicatorGroups",
     "indicators",
-    "dataSets",
-    "programs",
     "sections",
+    "dataSets",
+    "validationRuleGroups",
     "visualizations",
     "dashboards",
     "maps",
     "legendSets",
+    "userGroups",
+    "userRoles",
+    "users",
+];
+
+const coreMetadataTypes = [
+    "categories",
+    "categoryCombos",
+    "categoryOptions",
+    "categoryOptionCombos",
+    "categoryOptionGroups",
+    "categoryOptionGroupSets",
+    "dataElements",
+    "dataElementGroups",
+    "dataSets",
+    "sections",
+    "indicatorTypes",
+    "indicatorGroups",
+    "indicators",
+    "legendSets",
+    "visualizations",
+    "dashboards",
+    "maps",
+    "validationRuleGroups",
 ] as const;
+
+const securityMetadataTypes = ["userGroups", "userRoles", "users"] as const;
+
+type JsonTypeGraphPolicy = {
+    relatedTypes: string[];
+    noIncomingFromTypes?: string[];
+};
+
+// Initial policy for the JSON package tab.
+// It defines the expected neighborhood for each center type and the preferred display order.
+// Unknown types fallback to dynamic behavior.
+const graphPolicyByCenterType: Record<string, JsonTypeGraphPolicy> = {
+    attributes: {
+        relatedTypes: unique([
+            ...coreMetadataTypes,
+            ...securityMetadataTypes,
+            "attributes",
+        ]),
+    },
+    categories: {
+        relatedTypes: [
+            "categoryCombos",
+            "categoryOptions",
+            "categoryOptionCombos",
+            "categoryOptionGroups",
+            "categoryOptionGroupSets",
+            "dataElements",
+            "dataSets",
+            "sections",
+            "indicators",
+            "indicatorGroups",
+            "visualizations",
+            "maps",
+        ],
+    },
+    categoryCombos: {
+        relatedTypes: [
+            "categories",
+            "categoryOptions",
+            "categoryOptionCombos",
+            "dataElements",
+            "dataSets",
+            "sections",
+            "indicators",
+            "indicatorGroups",
+            "visualizations",
+            "maps",
+        ],
+    },
+    categoryOptionCombos: {
+        relatedTypes: [
+            "categoryCombos",
+            "categories",
+            "categoryOptions",
+            "categoryOptionGroups",
+            "categoryOptionGroupSets",
+            "dataElements",
+            "indicators",
+            "dataSets",
+            "sections",
+            "visualizations",
+            "maps",
+        ],
+    },
+    categoryOptionGroupSets: {
+        relatedTypes: [
+            "categoryOptionGroups",
+            "categoryOptions",
+            "categoryOptionCombos",
+            "categories",
+            "categoryCombos",
+            "dataElements",
+            "indicators",
+        ],
+    },
+    categoryOptionGroups: {
+        relatedTypes: [
+            "categoryOptionGroupSets",
+            "categoryOptions",
+            "categoryOptionCombos",
+            "categories",
+            "categoryCombos",
+            "dataElements",
+            "indicators",
+        ],
+    },
+    categoryOptions: {
+        relatedTypes: [
+            "categoryOptionGroups",
+            "categoryOptionGroupSets",
+            "categories",
+            "categoryCombos",
+            "categoryOptionCombos",
+            "dataElements",
+            "indicators",
+            "dataSets",
+            "sections",
+            "visualizations",
+            "maps",
+        ],
+    },
+    dashboards: {
+        relatedTypes: [
+            "visualizations",
+            "maps",
+            "indicators",
+            "indicatorGroups",
+            "indicatorTypes",
+            "dataElements",
+            "dataSets",
+            "sections",
+            "legendSets",
+            "users",
+            "userGroups",
+        ],
+    },
+    dataElementGroups: {
+        relatedTypes: [
+            "dataElements",
+            "dataSets",
+            "sections",
+            "categories",
+            "categoryCombos",
+            "categoryOptions",
+            "categoryOptionCombos",
+            "indicators",
+            "visualizations",
+            "maps",
+            "legendSets",
+        ],
+    },
+    dataElements: {
+        relatedTypes: [
+            "categoryCombos",
+            "categories",
+            "categoryOptions",
+            "categoryOptionCombos",
+            "dataElementGroups",
+            "dataSets",
+            "sections",
+            "indicators",
+            "indicatorGroups",
+            "indicatorTypes",
+            "legendSets",
+            "visualizations",
+            "maps",
+            "dashboards",
+        ],
+    },
+    dataSets: {
+        relatedTypes: [
+            "sections",
+            "dataElements",
+            "dataElementGroups",
+            "categoryCombos",
+            "categories",
+            "categoryOptions",
+            "categoryOptionCombos",
+            "indicators",
+            "indicatorGroups",
+            "indicatorTypes",
+            "legendSets",
+            "visualizations",
+            "maps",
+            "dashboards",
+        ],
+        noIncomingFromTypes: [
+            "dataElements",
+            "categoryCombos",
+            "categories",
+            "categoryOptions",
+            "categoryOptionCombos",
+        ],
+    },
+    indicatorGroups: {
+        relatedTypes: [
+            "indicators",
+            "indicatorTypes",
+            "visualizations",
+            "maps",
+            "dashboards"
+        ],
+    },
+    indicatorTypes: {
+        relatedTypes: [
+            "indicators",
+            "indicatorGroups",
+            "maps",
+            "dashboards"
+        ],
+    },
+    indicators: {
+        relatedTypes: [
+            "indicatorTypes",
+            "indicatorGroups",
+            "dataElements",
+            "dataElementGroups",
+            "dataSets",
+            "sections",
+            "visualizations",
+            "maps",
+            "dashboards",
+            "legendSets",
+            "categories",
+            "categoryCombos",
+            "categoryOptions",
+            "categoryOptionCombos",
+        ],
+    },
+    legendSets: {
+        relatedTypes: [
+            "visualizations",
+            "maps"
+        ],
+    },
+    maps: {
+        relatedTypes: [
+            "legendSets",
+            "dashboards",
+            "visualizations",
+        ],
+    },
+    sections: {
+        relatedTypes: [
+            "dataSets",
+            "dataElements",
+            "dataElementGroups",
+            "categoryCombos",
+            "categories",
+            "categoryOptions",
+            "categoryOptionCombos",
+            "indicators",
+            "indicatorGroups",
+            "indicatorTypes",
+            "legendSets",
+            "visualizations",
+            "maps",
+            "dashboards",
+        ],
+    },
+    userGroups: {
+        relatedTypes: unique([
+            ...securityMetadataTypes,
+            "users",
+            "userRoles"
+        ]),
+    },
+    userRoles: {
+        relatedTypes: unique([
+            ...securityMetadataTypes,
+            "users",
+            "userGroups"
+        ]),
+    },
+    users: {
+        relatedTypes: unique([
+            ...securityMetadataTypes,
+            "userRoles",
+            "userGroups"
+        ]),
+    },
+    validationRuleGroups: {
+        relatedTypes: [
+            "dataElements",
+            "dataSets",
+            "sections",
+            "indicators",
+            "indicatorGroups",
+            "indicatorTypes",
+            "categories",
+            "categoryCombos",
+            "categoryOptions",
+            "categoryOptionCombos",
+        ],
+    },
+    visualizations: {
+        relatedTypes: [
+            "dashboards",
+            "maps",
+            "legendSets",
+            "indicators",
+            "indicatorGroups",
+            "indicatorTypes",
+            "dataElements",
+            "dataElementGroups",
+            "dataSets",
+            "sections",
+            "categories",
+            "categoryCombos",
+            "categoryOptions",
+            "categoryOptionCombos",
+        ],
+    },
+};
 
 const ignoredTopLevelReferenceFields = new Set([
     "sharing",
@@ -111,6 +434,7 @@ export function buildJsonPackageDependencyGraph(
     if (!centerEntry) {
         throw new Error(`Metadata item not found: ${centerKey}`);
     }
+    const centerType = centerEntry.type;
 
     const visitedKeys = new Set<string>([centerKey]);
     const queue = [centerKey];
@@ -119,9 +443,15 @@ export function buildJsonPackageDependencyGraph(
     while (queue.length > 0) {
         const fromKey = queue.shift();
         if (!fromKey) continue;
+        const currentEntry = index.entriesByKey.get(fromKey);
+        const currentType = currentEntry?.type;
 
         const refs = index.refsByKey.get(fromKey) ?? [];
         refs.forEach(ref => {
+            const toEntry = index.entriesByKey.get(ref.toKey);
+            if (!toEntry) return;
+            if (!shouldIncludeTypeForCenter(centerType, toEntry.type)) return;
+
             const edgeKey = `${fromKey}|${ref.toKey}|${ref.via}`;
             if (!graphEdges.has(edgeKey)) {
                 graphEdges.set(edgeKey, { from: fromKey, to: ref.toKey, label: ref.via });
@@ -129,14 +459,22 @@ export function buildJsonPackageDependencyGraph(
 
             if (visitedKeys.size >= maxNodes) return;
             if (visitedKeys.has(ref.toKey)) return;
-            if (!index.entriesByKey.has(ref.toKey)) return;
 
             visitedKeys.add(ref.toKey);
             queue.push(ref.toKey);
         });
 
+        if (currentType && shouldSkipIncomingForCurrentType(centerType, currentType)) {
+            continue;
+        }
+
         const incomingRefs = index.incomingRefsByKey.get(fromKey) ?? [];
         incomingRefs.forEach(ref => {
+            const incomingEntry = index.entriesByKey.get(ref.fromKey);
+            if (!incomingEntry) return;
+            if (!shouldIncludeTypeForCenter(centerType, incomingEntry.type)) return;
+            if (incomingEntry.type === centerType && ref.fromKey !== centerKey) return;
+
             const edgeKey = `${ref.fromKey}|${fromKey}|${ref.via}`;
             if (!graphEdges.has(edgeKey)) {
                 graphEdges.set(edgeKey, { from: ref.fromKey, to: fromKey, label: ref.via });
@@ -144,7 +482,6 @@ export function buildJsonPackageDependencyGraph(
 
             if (visitedKeys.size >= maxNodes) return;
             if (visitedKeys.has(ref.fromKey)) return;
-            if (!index.entriesByKey.has(ref.fromKey)) return;
 
             visitedKeys.add(ref.fromKey);
             queue.push(ref.fromKey);
@@ -157,7 +494,7 @@ export function buildJsonPackageDependencyGraph(
         .map(entry => ({
             key: entry.key,
             id: entry.id,
-            type: entry.type as ResourceType,
+            type: entry.type,
             displayName: entry.displayName,
         }));
 
@@ -258,7 +595,7 @@ function buildTypeGroups(
     });
 
     return Array.from(groupsByType.entries())
-        .sort(([a], [b]) => compareTypeNames(a, b))
+        .sort(([a], [b]) => compareTypeNamesForCenter(a, b, centerType))
         .map(([type, nodeKeys]) => ({
             id: `json-type:${type}`,
             title: type,
@@ -317,7 +654,40 @@ function compareTypeNames(a: string, b: string): number {
     return a.localeCompare(b);
 }
 
+function compareTypeNamesForCenter(a: string, b: string, centerType?: string): number {
+    const related = centerType ? getRelatedTypesForCenter(centerType) : [];
+    const aIndex = related.indexOf(a);
+    const bIndex = related.indexOf(b);
+
+    if (aIndex !== -1 || bIndex !== -1) {
+        if (aIndex === -1) return 1;
+        if (bIndex === -1) return -1;
+        if (aIndex !== bIndex) return aIndex - bIndex;
+    }
+
+    return compareTypeNames(a, b);
+}
+
 function getTypePriority(type: string): number {
-    const index = typePriorityOrder.indexOf(type as (typeof typePriorityOrder)[number]);
+    const index = typePriorityOrder.indexOf(type);
     return index === -1 ? typePriorityOrder.length + 1 : index;
+}
+
+function shouldIncludeTypeForCenter(centerType: string, candidateType: string): boolean {
+    const related = getRelatedTypesForCenter(centerType);
+    if (!related.length) return true;
+    return candidateType === centerType || related.includes(candidateType);
+}
+
+function shouldSkipIncomingForCurrentType(centerType: string, currentType: string): boolean {
+    const skipIncoming = graphPolicyByCenterType[centerType]?.noIncomingFromTypes ?? [];
+    return skipIncoming.includes(currentType);
+}
+
+function getRelatedTypesForCenter(centerType: string): string[] {
+    return graphPolicyByCenterType[centerType]?.relatedTypes ?? [];
+}
+
+function unique(values: readonly string[]): string[] {
+    return Array.from(new Set(values));
 }

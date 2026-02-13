@@ -1,6 +1,6 @@
 import React from "react";
 import { GraphGroup, GraphNode, MetadataGraph } from "$/domain/metadata/MetadataGraph";
-import { resourceTypeLabels, ResourceType } from "$/domain/metadata/ResourceType";
+import { isResourceType, resourceTypeLabels } from "$/domain/metadata/ResourceType";
 import { IdenticonAvatar } from "$/webapp/components/metadata/IdenticonAvatar";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import CenterFocusStrongIcon from "@material-ui/icons/CenterFocusStrong";
@@ -40,10 +40,14 @@ export const MetadataGraphView: React.FC<MetadataGraphViewProps> = ({
         return new Map(graph.nodes.map(node => [node.key, node]));
     }, [graph.nodes]);
 
-    const parentGroups = graph.groups.filter(group => group.direction === "parent");
-    const childGroups = graph.groups.filter(group => group.direction === "child");
-    const leftGroups = parentGroups.length > 0 ? parentGroups : childGroups;
-    const rightGroups = parentGroups.length > 0 ? childGroups : [];
+    const orderedGroups = React.useMemo(() => {
+        const parentGroups = graph.groups.filter(group => group.direction === "parent");
+        const childGroups = graph.groups.filter(group => group.direction === "child");
+        if (parentGroups.length > 0 && childGroups.length > 0) {
+            return [...parentGroups, ...childGroups];
+        }
+        return graph.groups;
+    }, [graph.groups]);
 
     const registerNode = React.useCallback((key: string) => {
         return (element: HTMLDivElement | null) => {
@@ -88,7 +92,9 @@ export const MetadataGraphView: React.FC<MetadataGraphViewProps> = ({
 
     const centerNode = nodeMap.get(graph.center);
     const centerTypeLabel = centerNode
-        ? resourceTypeLabels[centerNode.type as ResourceType] ?? centerNode.type
+        ? isResourceType(centerNode.type)
+            ? resourceTypeLabels[centerNode.type]
+            : centerNode.type
         : "";
 
     const handlePointerDown = React.useCallback((event: React.PointerEvent<HTMLDivElement>) => {
@@ -162,17 +168,6 @@ export const MetadataGraphView: React.FC<MetadataGraphViewProps> = ({
                 </svg>
 
                 <div className="graph-layout__columns">
-                    {leftGroups.map(group => (
-                        <GraphGroupColumn
-                            key={group.id}
-                            group={group}
-                            nodeMap={nodeMap}
-                            registerNode={registerNode}
-                            onOpenApi={onOpenApi}
-                            onFocus={onFocus}
-                        />
-                    ))}
-
                     <div className="graph-layout__column graph-layout__column--center">
                         {centerNode && (
                             <>
@@ -190,7 +185,7 @@ export const MetadataGraphView: React.FC<MetadataGraphViewProps> = ({
                         )}
                     </div>
 
-                    {rightGroups.map(group => (
+                    {orderedGroups.map(group => (
                         <GraphGroupColumn
                             key={group.id}
                             group={group}

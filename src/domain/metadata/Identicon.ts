@@ -1,4 +1,3 @@
-import { ResourceType } from "$/domain/metadata/ResourceType";
 import { sha256 } from "@noble/hashes/sha256";
 import { bytesToHex } from "@noble/hashes/utils";
 
@@ -11,7 +10,7 @@ export type IdenticonResult = {
     background: string;
 };
 
-export function identiconSeed(type: ResourceType, uid: string): string {
+export function identiconSeed(type: string, uid: string): string {
     return `${type}:${uid}:v1`;
 }
 

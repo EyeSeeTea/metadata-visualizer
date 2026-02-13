@@ -7,7 +7,7 @@ import {
     MetadataGraph,
     graphNodeKey,
 } from "$/domain/metadata/MetadataGraph";
-import { resourceTypeLabels } from "$/domain/metadata/ResourceType";
+import { isResourceType, resourceTypeLabels } from "$/domain/metadata/ResourceType";
 import { MetadataItem, MetadataList } from "$/domain/metadata/MetadataItem";
 import { useAppContext } from "$/webapp/contexts/app-context";
 import { MetadataGraphView } from "$/webapp/components/metadata/MetadataGraphView";
@@ -151,6 +151,7 @@ export const MetadataGraphPanel: React.FC<MetadataGraphPanelProps> = ({
     };
 
     const handleFocus = (node: GraphNode) => {
+        if (!isResourceType(node.type)) return;
         onFocusItem({ id: node.id, type: node.type, displayName: node.displayName });
     };
 

@@ -1,6 +1,5 @@
 import React from "react";
 import { GraphNode } from "$/domain/metadata/MetadataGraph";
-import { ResourceType } from "$/domain/metadata/ResourceType";
 import { IdenticonAvatar } from "$/webapp/components/metadata/IdenticonAvatar";
 import { MetadataGraphView } from "$/webapp/components/metadata/MetadataGraphView";
 import { MetadataGraphView3D } from "$/webapp/components/metadata/MetadataGraphView3D";
@@ -103,6 +102,7 @@ export const JsonPackageExplorer: React.FC = () => {
     }, [loadedData, selectedEntry]);
 
     const handleFocus = React.useCallback((node: GraphNode) => {
+        setSelectedType(node.type);
         setSelectedEntryKey(node.key);
     }, []);
 
@@ -200,7 +200,7 @@ export const JsonPackageExplorer: React.FC = () => {
                                                 >
                                                     <td className="metadata-table__cell metadata-table__cell--avatar">
                                                         <IdenticonAvatar
-                                                            type={entry.type as ResourceType}
+                                                            type={entry.type}
                                                             uid={entry.id}
                                                             size={32}
                                                         />
