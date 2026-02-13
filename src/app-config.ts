@@ -1,4 +1,5 @@
 import { FeedbackOptions } from "@eyeseetea/feedback-component";
+import { buildInfo, feedbackDescriptionTemplate } from "$/utils/build-info";
 
 export const appConfig: AppConfig = {
     id: "coc-visualizer",
@@ -12,11 +13,12 @@ export const appConfig: AppConfig = {
                 // Web development -> Common resources -> app-skeleton
                 listId: "42597084",
                 title: "[User feedback] {title}",
-                body: "## dhis2\n\nUsername: {username}\n\n{body}",
+                body: `## dhis2\n\nUsername: {username}\nBuild commit: ${buildInfo.commit}\n\n{body}`,
             },
         },
         layoutOptions: {
             buttonPosition: "bottom-start",
+            descriptionTemplate: feedbackDescriptionTemplate,
         },
     },
 };

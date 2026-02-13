@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useDataEngine } from "@dhis2/app-runtime";
+import { HeaderBar } from "@dhis2/ui";
 import { SnackbarProvider } from "@eyeseetea/d2-ui-components";
 import { Feedback } from "@eyeseetea/feedback-component";
 import { MuiThemeProvider } from "@material-ui/core/styles";
@@ -12,6 +13,7 @@ import { Share } from "$/webapp/components/share/Share";
 import { AppContext, AppContextState } from "$/webapp/contexts/app-context";
 import { MetadataExplorerPage } from "$/webapp/pages/metadata/MetadataExplorerPage";
 import { configI18n } from "$/webapp/utils/i18n-setup";
+import { buildInfo } from "$/utils/build-info";
 import "./App.css";
 import muiThemeLegacy from "./themes/dhis2-legacy.theme";
 import { muiTheme } from "./themes/dhis2.theme";
@@ -52,12 +54,7 @@ function App_(_props: {}) {
         <MuiThemeProvider theme={muiTheme}>
             <OldMuiThemeProvider muiTheme={muiThemeLegacy}>
                 <SnackbarProvider>
-                    <AppHeader>
-                        <AppTitle>Metadata Visualizer</AppTitle>
-                        <AppUser>
-                            {appContext.currentUser.name} ({appContext.currentUser.username})
-                        </AppUser>
-                    </AppHeader>
+                    <StyledHeaderBar appName="Metadata Visualizer" />
 
                     {appConfig.feedback && appContext && (
                         <Feedback
@@ -70,6 +67,10 @@ function App_(_props: {}) {
                         <AppContext.Provider value={appContext}>
                             <MetadataExplorerPage />
                         </AppContext.Provider>
+
+                        <BuildStamp data-build-commit={buildInfo.commit} data-build-time={buildInfo.builtAt}>
+                            {`build:${buildInfo.commit}`}
+                        </BuildStamp>
                     </div>
 
                     <Share visible={showShareButton} />
@@ -79,25 +80,32 @@ function App_(_props: {}) {
     );
 }
 
-const AppHeader = styled.header`
-    height: 48px;
-    background: #2c6693;
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
+const StyledHeaderBar = styled(HeaderBar)`
+    div:first-of-type {
+        box-sizing: border-box;
+    }
 `;
 
-const AppTitle = styled.h1`
-    font-size: 16px;
-    font-weight: 600;
-    margin: 0;
-`;
+const BuildStamp = styled.div`
+    display: block;
+    width: fit-content;
+    margin: 4px 0 0 auto;
+    font-size: 9px;
+    line-height: 1;
+    letter-spacing: 0.2px;
+    color: transparent;
+    user-select: text;
+    cursor: text;
 
-const AppUser = styled.div`
-    font-size: 12px;
-    opacity: 0.85;
+    &::selection {
+        color: #6b7280;
+        background: #d1d5db;
+    }
+
+    &::-moz-selection {
+        color: #6b7280;
+        background: #d1d5db;
+    }
 `;
 
 export const App = React.memo(App_);

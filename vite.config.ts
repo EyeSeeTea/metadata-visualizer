@@ -3,15 +3,22 @@ import { UserConfig, defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import checker from "vite-plugin-checker";
 import nodePolyfills from "vite-plugin-node-stdlib-browser";
+import { execSync } from "child_process";
 import * as path from "path";
 
 export default ({ mode }): UserConfig => {
     const env = { ...process.env, ...loadEnv(mode, process.cwd(), "") };
     const proxy = getProxy(env);
+    const buildCommit = resolveBuildCommit();
+    const buildTime = resolveBuildTime(env);
 
     // https://vitejs.dev/config/
     return defineConfig({
         base: "", // Relative paths
+        define: {
+            __APP_BUILD_COMMIT__: JSON.stringify(buildCommit),
+            __APP_BUILD_TIME__: JSON.stringify(buildTime),
+        },
         plugins: [
             nodePolyfills(),
             react(),
@@ -71,4 +78,22 @@ function getProxy(env: Record<string, string>) {
 
         return proxy;
     }
+}
+
+function resolveBuildCommit() {
+    try {
+        return execSync("git rev-parse --short=12 HEAD", { stdio: ["ignore", "pipe", "ignore"] })
+            .toString()
+            .trim();
+    } catch {
+        return "unknown";
+    }
+}
+
+function resolveBuildTime(env: Record<string, string>) {
+    if (env.VITE_APP_BUILD_TIME) {
+        return env.VITE_APP_BUILD_TIME;
+    }
+
+    return new Date().toISOString();
 }
