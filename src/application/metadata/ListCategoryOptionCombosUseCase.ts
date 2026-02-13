@@ -12,7 +12,7 @@ export class ListCategoryOptionCombosUseCase {
     }): FutureData<MetadataList> {
         return this.options.metadataRepository.list({
             type: "categoryOptionCombos",
-            fields: "id,displayName,categoryCombo[displayName]",
+            fields: "id,displayName,categoryCombo[id,displayName]",
             filters: [`categoryCombo.id:eq:${input.categoryComboId}`],
             page: input.page,
             pageSize: input.pageSize,
