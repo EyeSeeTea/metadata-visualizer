@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2026-02-13T10:39:15.321Z\n"
-"PO-Revision-Date: 2026-02-13T10:39:15.321Z\n"
+"POT-Creation-Date: 2026-02-13T11:28:44.684Z\n"
+"PO-Revision-Date: 2026-02-13T11:28:44.684Z\n"
 
 msgid "Add"
 msgstr ""
@@ -86,12 +86,6 @@ msgstr ""
 msgid "Avatar"
 msgstr ""
 
-msgid "item"
-msgstr ""
-
-msgid "object"
-msgstr ""
-
 msgid "Back"
 msgstr ""
 
@@ -114,6 +108,42 @@ msgid "Detail page"
 msgstr ""
 
 msgid "Section"
+msgstr ""
+
+msgid "Unknown JSON parsing error"
+msgstr ""
+
+msgid "Metadata package JSON"
+msgstr ""
+
+msgid "Metadata type"
+msgstr ""
+
+msgid "Search"
+msgstr ""
+
+msgid "Filter by id or name"
+msgstr ""
+
+msgid "Select a metadata package JSON file to start"
+msgstr ""
+
+msgid "Loading package..."
+msgstr ""
+
+msgid "{{types}} types"
+msgstr ""
+
+msgid "{{items}} items"
+msgstr ""
+
+msgid "No results for this type/filter"
+msgstr ""
+
+msgid "Select a row to view dependencies"
+msgstr ""
+
+msgid "Selected metadata JSON"
 msgstr ""
 
 msgid "Metadata views"
@@ -141,13 +171,4 @@ msgid "Prev"
 msgstr ""
 
 msgid "Next"
-msgstr ""
-
-msgid "This tab will be used to upload and inspect metadata packages."
-msgstr ""
-
-msgid "Choose package (coming soon)"
-msgstr ""
-
-msgid "Next step - wire this tab to package parsing and preview before import."
 msgstr ""

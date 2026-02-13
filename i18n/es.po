@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2026-02-13T10:39:15.321Z\n"
+"POT-Creation-Date: 2026-02-13T11:28:44.684Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -86,12 +86,6 @@ msgstr "Sin resultados"
 msgid "Avatar"
 msgstr "Avatar"
 
-msgid "item"
-msgstr "elemento"
-
-msgid "object"
-msgstr "objeto"
-
 msgid "Back"
 msgstr "Volver"
 
@@ -115,6 +109,42 @@ msgstr "Página de detalle"
 
 msgid "Section"
 msgstr "Sección"
+
+msgid "Unknown JSON parsing error"
+msgstr "Error desconocido al procesar el JSON"
+
+msgid "Metadata package JSON"
+msgstr "Paquete JSON de metadatos"
+
+msgid "Metadata type"
+msgstr "Tipo de metadato"
+
+msgid "Search"
+msgstr "Buscar"
+
+msgid "Filter by id or name"
+msgstr "Filtrar por id o nombre"
+
+msgid "Select a metadata package JSON file to start"
+msgstr "Selecciona un archivo JSON de metadatos para empezar"
+
+msgid "Loading package..."
+msgstr "Cargando paquete..."
+
+msgid "{{types}} types"
+msgstr "{{types}} tipos"
+
+msgid "{{items}} items"
+msgstr "{{items}} elementos"
+
+msgid "No results for this type/filter"
+msgstr "Sin resultados para este tipo/filtro"
+
+msgid "Select a row to view dependencies"
+msgstr "Selecciona una fila para ver dependencias"
+
+msgid "Selected metadata JSON"
+msgstr "JSON de metadato seleccionado"
 
 msgid "Metadata views"
 msgstr "Vistas de metadatos"
@@ -143,14 +173,21 @@ msgstr "Anterior"
 msgid "Next"
 msgstr "Siguiente"
 
-msgid "This tab will be used to upload and inspect metadata packages."
-msgstr ""
-"Esta pestaña se usará para cargar e inspeccionar paquetes de metadatos."
+#~ msgid "item"
+#~ msgstr "elemento"
 
-msgid "Choose package (coming soon)"
-msgstr "Elegir paquete (próximamente)"
+#~ msgid "object"
+#~ msgstr "objeto"
 
-msgid "Next step - wire this tab to package parsing and preview before import."
-msgstr ""
-"Siguiente paso - conectar esta pestaña al análisis del paquete y a la vista "
-"previa antes de importar."
+#~ msgid "This tab will be used to upload and inspect metadata packages."
+#~ msgstr ""
+#~ "Esta pestaña se usará para cargar e inspeccionar paquetes de metadatos."
+
+#~ msgid "Choose package (coming soon)"
+#~ msgstr "Elegir paquete (próximamente)"
+
+#~ msgid ""
+#~ "Next step - wire this tab to package parsing and preview before import."
+#~ msgstr ""
+#~ "Siguiente paso - conectar esta pestaña al análisis del paquete y a la "
+#~ "vista previa antes de importar."
