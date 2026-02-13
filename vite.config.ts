@@ -6,7 +6,7 @@ import nodePolyfills from "vite-plugin-node-stdlib-browser";
 import * as path from "path";
 
 export default ({ mode }): UserConfig => {
-    const env = { ...process.env, ...loadEnv(mode, process.cwd()) };
+    const env = { ...process.env, ...loadEnv(mode, process.cwd(), "") };
     const proxy = getProxy(env);
 
     // https://vitejs.dev/config/
@@ -33,6 +33,7 @@ export default ({ mode }): UserConfig => {
         },
         server: {
             port: parseInt(env.VITE_PORT),
+            host: "127.0.0.1",
             proxy: proxy,
         },
         resolve: {
@@ -45,7 +46,7 @@ export default ({ mode }): UserConfig => {
 
 function getProxy(env: Record<string, string>) {
     const dhis2UrlVar = "VITE_DHIS2_BASE_URL";
-    const dhis2AuthVar = "VITE_DHIS2_AUTH";
+    const dhis2AuthVar = "DHIS2_AUTH";
     const targetUrl = env[dhis2UrlVar];
     const auth = env[dhis2AuthVar];
     const isBuild = env.NODE_ENV === "production";
@@ -55,17 +56,19 @@ function getProxy(env: Record<string, string>) {
     } else if (!targetUrl) {
         console.error(`Set ${dhis2UrlVar}`);
         process.exit(1);
-    } else if (!auth) {
-        console.error(`Set ${dhis2AuthVar}`);
-        process.exit(1);
     } else {
-        return {
+        const proxy: Record<string, any> = {
             "/dhis2": {
                 target: targetUrl,
                 changeOrigin: true,
-                auth: auth,
                 rewrite: path => path.replace(/^\/dhis2/, ""),
             },
         };
+
+        if (auth) {
+            proxy["/dhis2"].auth = auth;
+        }
+
+        return proxy;
     }
 }
