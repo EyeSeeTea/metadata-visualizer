@@ -1,37 +1,40 @@
 import React from "react";
-import i18n from "@dhis2/d2-i18n";
 import { Provider } from "@dhis2/app-runtime";
-import { D2Api } from "$/types/d2-api";
 import { App } from "./App";
-import { CompositionRoot, getWebappCompositionRoot } from "$/CompositionRoot";
 
 export function Dhis2App(_props: {}) {
-    const [compositionRootRes, setCompositionRootRes] = React.useState<CompositionRootResult>({
-        type: "loading",
-    });
+    const [baseUrlRes, setBaseUrlRes] = React.useState<BaseUrlResult>({ type: "loading" });
 
     React.useEffect(() => {
-        getData().then(setCompositionRootRes);
+        getBaseUrl()
+            .then(baseUrl => setBaseUrlRes({ type: "loaded", data: { baseUrl } }))
+            .catch(error =>
+                setBaseUrlRes({
+                    type: "error",
+                    error: { baseUrl: env["VITE_DHIS2_BASE_URL"], error: error as Error },
+                })
+            );
     }, []);
 
-    switch (compositionRootRes.type) {
+    switch (baseUrlRes.type) {
         case "loading":
             return <h3>Loading...</h3>;
         case "error": {
-            const { baseUrl, error } = compositionRootRes.error;
+            const { baseUrl, error } = baseUrlRes.error;
+            const fallbackBaseUrl = baseUrl || "/dhis2";
             return (
-                <h3 style={{ margin: 20 }}>
+                <div style={{ margin: 20 }}>
                     <h3>{error.message}</h3>
-                    <a rel="noopener noreferrer" target="_blank" href={baseUrl}>
-                        Login {baseUrl}
+                    <a rel="noopener noreferrer" target="_blank" href={fallbackBaseUrl}>
+                        Login {fallbackBaseUrl}
                     </a>
-                </h3>
+                </div>
             );
         }
         case "loaded": {
-            const { baseUrl, compositionRoot } = compositionRootRes.data;
+            const { baseUrl } = baseUrlRes.data;
             type ProviderProps = React.ComponentProps<typeof Provider>;
-            const config: ProviderProps["config"] = { baseUrl, apiVersion: 30 };
+            const config: ProviderProps["config"] = { baseUrl, apiVersion: 41 };
 
             return (
                 <Provider
@@ -40,35 +43,10 @@ export function Dhis2App(_props: {}) {
                     parentAlertsAdd={() => {}}
                     showAlertsInPlugin={false}
                 >
-                    <App compositionRoot={compositionRoot} />
+                    <App />
                 </Provider>
             );
         }
-    }
-}
-
-type Data = {
-    compositionRoot: CompositionRoot;
-    baseUrl: string;
-};
-
-async function getData(): Promise<CompositionRootResult> {
-    const baseUrl = await getBaseUrl();
-
-    const auth = env["VITE_DHIS2_AUTH"];
-    const [username = "", password = ""] = auth.split(":");
-    const api = auth
-        ? new D2Api({ baseUrl: baseUrl, auth: { username, password } })
-        : new D2Api({ baseUrl: baseUrl });
-    const compositionRoot = getWebappCompositionRoot(api);
-
-    const userSettings = await api.get<{ keyUiLocale: string }>("/userSettings").getData();
-    configI18n(userSettings);
-
-    try {
-        return { type: "loaded", data: { baseUrl, compositionRoot } };
-    } catch (err) {
-        return { type: "error", error: { baseUrl, error: err as Error } };
     }
 }
 
@@ -107,20 +85,9 @@ function getInjectedBaseUrl() {
     }
 }
 
-const isLangRTL = (code: string) => {
-    const langs = ["ar", "fa", "ur"];
-    const prefixed = langs.map(c => `${c}-`);
-    return langs.includes(code) || prefixed.filter(c => code && code.startsWith(c)).length > 0;
-};
-
-const configI18n = ({ keyUiLocale }: { keyUiLocale: string }) => {
-    i18n.changeLanguage(keyUiLocale);
-    document.documentElement.setAttribute("dir", isLangRTL(keyUiLocale) ? "rtl" : "ltr");
-};
-
 type Result<Data, E> =
     | { type: "loading" }
     | { type: "loaded"; data: Data }
     | { type: "error"; error: E };
 
-type CompositionRootResult = Result<Data, { baseUrl: string; error: Error }>;
+type BaseUrlResult = Result<{ baseUrl: string }, { baseUrl?: string; error: Error }>;

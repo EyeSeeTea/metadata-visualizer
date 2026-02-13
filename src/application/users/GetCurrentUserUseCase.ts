@@ -1,5 +1,5 @@
-import { FutureData } from "$/data/api-futures";
 import { User } from "$/domain/entities/User";
+import { FutureData } from "$/domain/entities/generic/FutureData";
 import { UserRepository } from "$/domain/repositories/UserRepository";
 
 export class GetCurrentUserUseCase {

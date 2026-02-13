@@ -1,7 +1,7 @@
 import { FeedbackOptions } from "@eyeseetea/feedback-component";
 
 export const appConfig: AppConfig = {
-    id: "dhis2-app-skeleton",
+    id: "coc-visualizer",
     appearance: {
         showShareButton: true,
     },
