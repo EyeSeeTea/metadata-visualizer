@@ -9,16 +9,17 @@ import {
 } from "$/webapp/components/metadata/MetadataQueryBuilder";
 import { MetadataTable } from "$/webapp/components/metadata/MetadataTable";
 import { MetadataGraphPanel } from "$/webapp/components/metadata/MetadataGraphPanel";
+import { JsonPackageExplorer } from "$/webapp/pages/metadata/JsonPackageExplorer";
 import i18n from "$/utils/i18n";
 import "./MetadataExplorerPage.css";
 
 const defaultFieldsByType: Record<ResourceType, string> = {
-    dataElements: "id,displayName,categoryCombo[displayName]",
-    dataSets: "id,displayName,categoryCombo[displayName]",
-    categories: "id,displayName,categoryOptions[displayName]",
-    categoryCombos: "id,displayName,categories[displayName]",
+    dataElements: "id,displayName,categoryCombo[id,displayName]",
+    dataSets: "id,displayName,categoryCombo[id,displayName]",
+    categories: "id,displayName,categoryOptions[id,displayName]",
+    categoryCombos: "id,displayName,categories[id,displayName]",
     categoryOptions: "id,displayName",
-    categoryOptionCombos: "id,displayName,categoryCombo[displayName]",
+    categoryOptionCombos: "id,displayName,categoryCombo[id,displayName]",
 };
 
 const initialQuery: MetadataQueryState = {
@@ -215,18 +216,7 @@ export const MetadataExplorerPage: React.FC = () => {
                 </>
             ) : (
                 <div className="metadata-import" role="tabpanel" aria-label={i18n.t("JSON Package")}>
-                    <h3 className="metadata-import__title">{i18n.t("JSON Package")}</h3>
-                    <p className="metadata-import__text">
-                        {i18n.t("This tab will be used to upload and inspect metadata packages.")}
-                    </p>
-                    <button type="button" className="metadata-import__button" disabled>
-                        {i18n.t("Choose package (coming soon)")}
-                    </button>
-                    <p className="metadata-import__hint">
-                        {i18n.t(
-                            "Next step - wire this tab to package parsing and preview before import."
-                        )}
-                    </p>
+                    <JsonPackageExplorer />
                 </div>
             )}
         </div>
