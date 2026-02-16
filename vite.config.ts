@@ -4,11 +4,13 @@ import react from "@vitejs/plugin-react";
 import checker from "vite-plugin-checker";
 import nodePolyfills from "vite-plugin-node-stdlib-browser";
 import { execSync } from "child_process";
+import { readFileSync } from "fs";
 import * as path from "path";
 
 export default ({ mode }): UserConfig => {
     const env = { ...process.env, ...loadEnv(mode, process.cwd(), "") };
     const proxy = getProxy(env);
+    const appTitle = resolveAppTitle();
     const buildCommit = resolveBuildCommit();
     const buildTime = resolveBuildTime(env);
 
@@ -21,6 +23,7 @@ export default ({ mode }): UserConfig => {
         },
         plugins: [
             nodePolyfills(),
+            injectAppTitlePlugin(appTitle),
             react(),
             checker({
                 overlay: false,
@@ -50,6 +53,31 @@ export default ({ mode }): UserConfig => {
         },
     });
 };
+
+function injectAppTitlePlugin(appTitle: string) {
+    return {
+        name: "inject-app-title",
+        transformIndexHtml(html: string) {
+            return html.replace(/%APP_TITLE%/g, appTitle);
+        },
+    };
+}
+
+function resolveAppTitle() {
+    try {
+        const packageJsonPath = path.resolve(__dirname, "package.json");
+        const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8")) as {
+            name?: string;
+            "manifest.webapp"?: {
+                name?: string;
+            };
+        };
+
+        return packageJson["manifest.webapp"]?.name ?? packageJson.name ?? "Metadata Visualizer";
+    } catch {
+        return "Metadata Visualizer";
+    }
+}
 
 function getProxy(env: Record<string, string>) {
     const dhis2UrlVar = "VITE_DHIS2_BASE_URL";
