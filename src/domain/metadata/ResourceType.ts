@@ -22,6 +22,30 @@ export const resourceTypeLabels: Record<ResourceType, string> = {
     categoryOptionCombos: "Category option combos",
 };
 
+export function getMetadataTypeLabel(type: string): string {
+    const normalized = type
+        .replace(/[_-\s]+/g, " ")
+        .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+        .trim();
+
+    if (!normalized) return type;
+
+    const words = normalized
+        .split(/\s+/)
+        .map(word => word.toLowerCase())
+        .filter(Boolean);
+
+    if (!words.length) return type;
+
+    const [first, ...rest] = words;
+    return `${first}${rest.map(capitalizeWord).join("")}`;
+}
+
+function capitalizeWord(word: string): string {
+    if (!word) return word;
+    return `${word.charAt(0).toUpperCase()}${word.slice(1)}`;
+}
+
 export const selectableResourceTypes = [
     "dataElements",
     "categories",

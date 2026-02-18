@@ -1,6 +1,6 @@
 import React from "react";
 import { GraphGroup, GraphNode, MetadataGraph } from "$/domain/metadata/MetadataGraph";
-import { isResourceType, resourceTypeLabels } from "$/domain/metadata/ResourceType";
+import { getMetadataTypeLabel } from "$/domain/metadata/ResourceType";
 import { IdenticonAvatar } from "$/webapp/components/metadata/IdenticonAvatar";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import CenterFocusStrongIcon from "@material-ui/icons/CenterFocusStrong";
@@ -91,11 +91,7 @@ export const MetadataGraphView: React.FC<MetadataGraphViewProps> = ({
     }, [graph.edges, graph.nodes, graph.groups]);
 
     const centerNode = nodeMap.get(graph.center);
-    const centerTypeLabel = centerNode
-        ? isResourceType(centerNode.type)
-            ? resourceTypeLabels[centerNode.type]
-            : centerNode.type
-        : "";
+    const centerTypeLabel = centerNode ? getMetadataTypeLabel(centerNode.type) : "";
 
     const handlePointerDown = React.useCallback((event: React.PointerEvent<HTMLDivElement>) => {
         if (!event.isPrimary || event.button !== 0) return;

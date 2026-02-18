@@ -8,7 +8,7 @@ import ForceGraph3D, {
 import * as THREE from "three";
 import { GraphEdge, GraphNode, MetadataGraph } from "$/domain/metadata/MetadataGraph";
 import { buildIdenticonSvg, identiconSeed, sha256Hex } from "$/domain/metadata/Identicon";
-import { isResourceType, resourceTypeLabels } from "$/domain/metadata/ResourceType";
+import { getMetadataTypeLabel } from "$/domain/metadata/ResourceType";
 import i18n from "$/utils/i18n";
 
 type ForceNode = NodeObject & {
@@ -135,9 +135,7 @@ export const MetadataGraphView3D: React.FC<MetadataGraphView3DProps> = ({
                 linkSource="source"
                 linkTarget="target"
                 nodeLabel={node =>
-                    `${isResourceType(node.type) ? resourceTypeLabels[node.type] : node.type}: ${
-                        node.name
-                    }`
+                    `${getMetadataTypeLabel(node.type)}: ${node.name}`
                 }
                 linkLabel={link => link.label}
                 nodeAutoColorBy={useTexture ? undefined : "type"}

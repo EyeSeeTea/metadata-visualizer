@@ -1,5 +1,6 @@
 import React from "react";
 import { GraphNode } from "$/domain/metadata/MetadataGraph";
+import { getMetadataTypeLabel } from "$/domain/metadata/ResourceType";
 import { IdenticonAvatar } from "$/webapp/components/metadata/IdenticonAvatar";
 import { MetadataGraphView } from "$/webapp/components/metadata/MetadataGraphView";
 import { MetadataGraphView3D } from "$/webapp/components/metadata/MetadataGraphView3D";
@@ -130,7 +131,9 @@ export const JsonPackageExplorer: React.FC = () => {
                             >
                                 {loadedData.types.map(type => (
                                     <option key={type} value={type}>
-                                        {`${type} (${loadedData.entriesByType[type]?.length ?? 0})`}
+                                        {`${getMetadataTypeLabel(type)} (${
+                                            loadedData.entriesByType[type]?.length ?? 0
+                                        })`}
                                     </option>
                                 ))}
                             </select>
@@ -210,7 +213,7 @@ export const JsonPackageExplorer: React.FC = () => {
                                                         {entry.displayName}
                                                     </td>
                                                     <td className="metadata-table__cell">
-                                                        {entry.type}
+                                                        {getMetadataTypeLabel(entry.type)}
                                                     </td>
                                                 </tr>
                                             );

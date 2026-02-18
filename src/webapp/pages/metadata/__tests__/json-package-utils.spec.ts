@@ -221,6 +221,89 @@ describe("json-package-utils", () => {
         expect(linkedTypes).toContain("indicatorTypes");
     });
 
+    it("does not show sibling dataSets when dataSets is the selected center type", () => {
+        const metadataPackage = {
+            dataSets: [
+                {
+                    id: "ds1",
+                    displayName: "DataSet 1",
+                    dataSetElements: [{ dataElement: { id: "de1" } }],
+                },
+                {
+                    id: "ds2",
+                    displayName: "DataSet 2",
+                    dataSetElements: [{ dataElement: { id: "de1" } }],
+                },
+            ],
+            dataElements: [
+                {
+                    id: "de1",
+                    displayName: "DE 1",
+                    dataSets: [{ id: "ds1" }, { id: "ds2" }],
+                },
+            ],
+        };
+
+        const index = indexJsonPackage(metadataPackage);
+        const dataSet = requireFirst(index.entriesByType.dataSets, "dataSets");
+        const graph = buildJsonPackageDependencyGraph(index, dataSet.key);
+
+        const dataSetNodes = graph.nodes.filter(node => node.type === "dataSets");
+        expect(dataSetNodes).toHaveLength(1);
+        expect(dataSetNodes[0]?.id).toBe("ds1");
+        expect(graph.groups.some(group => group.id === "json-type:dataSets")).toBe(false);
+    });
+
+    it("keeps categoryOptionGroups only in the center column and formats group labels", () => {
+        const metadataPackage = {
+            categoryOptionGroups: [
+                {
+                    id: "cog1",
+                    displayName: "15-24 years",
+                    categoryOptions: [{ id: "co1" }],
+                },
+                {
+                    id: "cog2",
+                    displayName: "25-49 years",
+                    categoryOptions: [{ id: "co1" }],
+                },
+            ],
+            categoryOptionGroupSets: [
+                {
+                    id: "cogs1",
+                    displayName: "Age groups",
+                    categoryOptionGroups: [{ id: "cog1" }, { id: "cog2" }],
+                },
+            ],
+            categories: [
+                {
+                    id: "cat1",
+                    displayName: "Age",
+                    categoryOptions: [{ id: "co1" }],
+                },
+            ],
+            categoryOptions: [
+                {
+                    id: "co1",
+                    displayName: "All ages",
+                    categoryOptionGroups: [{ id: "cog1" }, { id: "cog2" }],
+                },
+            ],
+        };
+
+        const index = indexJsonPackage(metadataPackage);
+        const group = requireFirst(index.entriesByType.categoryOptionGroups, "categoryOptionGroups");
+        const graph = buildJsonPackageDependencyGraph(index, group.key);
+
+        const selectedTypeNodes = graph.nodes.filter(node => node.type === "categoryOptionGroups");
+        expect(selectedTypeNodes).toHaveLength(1);
+        expect(selectedTypeNodes[0]?.id).toBe("cog1");
+        expect(graph.groups.some(item => item.id === "json-type:categoryOptionGroups")).toBe(false);
+
+        const groupSetBand = graph.groups.find(item => item.id === "json-type:categoryOptionGroupSets");
+        expect(groupSetBand?.title).toBe("categoryOptionGroupSets");
+    });
+
     it("keeps dataSets graph focused while still resolving multiple category paths", () => {
         const metadataPackage = {
             dataSets: [

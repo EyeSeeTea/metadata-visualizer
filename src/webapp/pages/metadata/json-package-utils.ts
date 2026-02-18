@@ -1,4 +1,5 @@
 import { MetadataGraph } from "$/domain/metadata/MetadataGraph";
+import { getMetadataTypeLabel } from "$/domain/metadata/ResourceType";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -368,7 +369,8 @@ export function buildJsonPackageDependencyGraph(
         const refs = sortOutgoingRefsForTraversal(
             index.refsByKey.get(fromKey) ?? [],
             index,
-            centerType
+            centerType,
+            centerKey
         );
         refs.forEach(({ ref }) => {
             const edgeKey = `${fromKey}|${ref.toKey}|${ref.via}`;
@@ -497,13 +499,15 @@ function resolveReferences(
 function sortOutgoingRefsForTraversal(
     refs: JsonPackageReference[],
     index: JsonPackageIndex,
-    centerType: string
+    centerType: string,
+    centerKey: string
 ): TraversalOutgoingRef[] {
     return refs
         .map(ref => {
             const toEntry = index.entriesByKey.get(ref.toKey);
             if (!toEntry) return null;
             if (!shouldIncludeTypeForCenter(centerType, toEntry.type)) return null;
+            if (toEntry.type === centerType && ref.toKey !== centerKey) return null;
             return { ref, toEntry };
         })
         .filter((item): item is TraversalOutgoingRef => Boolean(item))
@@ -542,6 +546,7 @@ function buildTypeGroups(
         const entry = index.entriesByKey.get(key);
         const nodeKey = keyToNodeKey.get(key);
         if (!entry || !nodeKey) return;
+        if (entry.type === centerType) return;
 
         const nodes = groupsByType.get(entry.type) ?? [];
         groupsByType.set(entry.type, [...nodes, nodeKey]);
@@ -551,7 +556,7 @@ function buildTypeGroups(
         .sort(([a], [b]) => compareTypeNamesForCenter(a, b, centerType))
         .map(([type, nodeKeys]) => ({
             id: `json-type:${type}`,
-            title: type,
+            title: getMetadataTypeLabel(type),
             nodeKeys,
             direction: resolveGroupDirection(type, centerType),
         }));
