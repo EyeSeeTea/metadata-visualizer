@@ -72,28 +72,16 @@ const graphPolicyByCenterType: Record<string, JsonTypeGraphPolicy> = {
             "categoryOptions",
             "categoryOptionCombos",
             "categoryOptionGroups",
-            "categoryOptionGroupSets",
-            "dataElements",
-            "dataSets",
-            "sections",
-            "indicators",
-            "indicatorGroups",
-            "visualizations",
-            "maps",
+            "categoryOptionGroupSets"
         ],
     },
     categoryCombos: {
         relatedTypes: [
-            "categories",
-            "categoryOptions",
-            "categoryOptionCombos",
-            "dataElements",
             "dataSets",
-            "sections",
-            "indicators",
-            "indicatorGroups",
-            "visualizations",
-            "maps",
+            "dataElements",
+            "categoryOptionCombos",
+            "categoryOptions",
+            "categories",
         ],
     },
     categoryOptionCombos: {
@@ -101,51 +89,31 @@ const graphPolicyByCenterType: Record<string, JsonTypeGraphPolicy> = {
             "categoryCombos",
             "categories",
             "categoryOptions",
-            "categoryOptionGroups",
-            "categoryOptionGroupSets",
-            "dataElements",
-            "indicators",
-            "dataSets",
-            "sections",
-            "visualizations",
-            "maps",
+            "dataElements"
         ],
     },
     categoryOptionGroupSets: {
         relatedTypes: [
-            "categoryOptionGroups",
             "categoryOptions",
-            "categoryOptionCombos",
             "categories",
-            "categoryCombos",
-            "dataElements",
-            "indicators",
+            "categoryCombos"
         ],
     },
     categoryOptionGroups: {
         relatedTypes: [
-            "categoryOptionGroupSets",
             "categoryOptions",
-            "categoryOptionCombos",
             "categories",
-            "categoryCombos",
-            "dataElements",
-            "indicators",
+            "categoryOptionGroupSets",
         ],
     },
     categoryOptions: {
         relatedTypes: [
+            "categoryCombos",
+            "categories",
+            "categoryOptionCombos",
             "categoryOptionGroups",
             "categoryOptionGroupSets",
-            "categories",
-            "categoryCombos",
-            "categoryOptionCombos",
-            "dataElements",
-            "indicators",
-            "dataSets",
-            "sections",
-            "visualizations",
-            "maps",
+            "dataElements"
         ],
     },
     dashboards: {
@@ -153,47 +121,26 @@ const graphPolicyByCenterType: Record<string, JsonTypeGraphPolicy> = {
             "visualizations",
             "maps",
             "indicators",
-            "indicatorGroups",
+            "indicatorGroups"
+        ],
+        noIncomingFromTypes: [
             "indicatorTypes",
-            "dataElements",
-            "dataSets",
-            "sections",
-            "legendSets",
-            "users",
-            "userGroups",
         ],
     },
     dataElementGroups: {
         relatedTypes: [
-            "dataElements",
-            "dataSets",
-            "sections",
-            "categories",
-            "categoryCombos",
-            "categoryOptions",
-            "categoryOptionCombos",
-            "indicators",
-            "visualizations",
-            "maps",
-            "legendSets",
+            "dataElements"
         ],
     },
     dataElements: {
         relatedTypes: [
-            "categoryCombos",
-            "categories",
-            "categoryOptions",
-            "categoryOptionCombos",
             "dataElementGroups",
             "dataSets",
             "sections",
-            "indicators",
-            "indicatorGroups",
-            "indicatorTypes",
-            "legendSets",
-            "visualizations",
-            "maps",
-            "dashboards",
+            "programs",
+            "programStages",
+            "categoryCombos",
+            "categories"
         ],
     },
     dataSets: {
@@ -202,19 +149,9 @@ const graphPolicyByCenterType: Record<string, JsonTypeGraphPolicy> = {
             "dataElements",
             "dataElementGroups",
             "categoryCombos",
-            "categories",
-            "categoryOptions",
-            "categoryOptionCombos",
-            "indicators",
-            "indicatorGroups",
-            "indicatorTypes",
-            "legendSets",
-            "visualizations",
-            "maps",
-            "dashboards",
+            "categories"
         ],
         noIncomingFromTypes: [
-            "dataElements",
             "categoryCombos",
             "categories",
             "categoryOptions",
@@ -225,15 +162,13 @@ const graphPolicyByCenterType: Record<string, JsonTypeGraphPolicy> = {
         relatedTypes: [
             "indicators",
             "indicatorTypes",
-            "visualizations",
-            "maps",
-            "dashboards"
         ],
     },
     indicatorTypes: {
         relatedTypes: [
             "indicators",
             "indicatorGroups",
+            "visualizations",
             "maps",
             "dashboards"
         ],
@@ -242,18 +177,9 @@ const graphPolicyByCenterType: Record<string, JsonTypeGraphPolicy> = {
         relatedTypes: [
             "indicatorTypes",
             "indicatorGroups",
-            "dataElements",
-            "dataElementGroups",
-            "dataSets",
-            "sections",
             "visualizations",
             "maps",
-            "dashboards",
-            "legendSets",
-            "categories",
-            "categoryCombos",
-            "categoryOptions",
-            "categoryOptionCombos",
+            "dashboards"
         ],
     },
     legendSets: {
@@ -265,8 +191,8 @@ const graphPolicyByCenterType: Record<string, JsonTypeGraphPolicy> = {
     maps: {
         relatedTypes: [
             "legendSets",
-            "dashboards",
             "visualizations",
+            "dashboards",
         ],
     },
     sections: {
@@ -279,12 +205,6 @@ const graphPolicyByCenterType: Record<string, JsonTypeGraphPolicy> = {
             "categoryOptions",
             "categoryOptionCombos",
             "indicators",
-            "indicatorGroups",
-            "indicatorTypes",
-            "legendSets",
-            "visualizations",
-            "maps",
-            "dashboards",
         ],
     },
     userGroups: {
@@ -311,13 +231,11 @@ const graphPolicyByCenterType: Record<string, JsonTypeGraphPolicy> = {
     validationRuleGroups: {
         relatedTypes: [
             "dataElements",
-            "dataSets",
             "sections",
+            "dataSets",
+            "programStages",
+            "programs",
             "indicators",
-            "indicatorGroups",
-            "indicatorTypes",
-            "categories",
-            "categoryCombos",
             "categoryOptions",
             "categoryOptionCombos",
         ],
@@ -328,16 +246,7 @@ const graphPolicyByCenterType: Record<string, JsonTypeGraphPolicy> = {
             "maps",
             "legendSets",
             "indicators",
-            "indicatorGroups",
-            "indicatorTypes",
             "dataElements",
-            "dataElementGroups",
-            "dataSets",
-            "sections",
-            "categories",
-            "categoryCombos",
-            "categoryOptions",
-            "categoryOptionCombos",
         ],
     },
 };
@@ -366,6 +275,16 @@ type JsonPackageReference = {
 type JsonPackageIncomingReference = {
     fromKey: string;
     via: string;
+};
+
+type TraversalOutgoingRef = {
+    ref: JsonPackageReference;
+    toEntry: JsonPackageEntry;
+};
+
+type TraversalIncomingRef = {
+    ref: JsonPackageIncomingReference;
+    fromEntry: JsonPackageEntry;
 };
 
 export type JsonPackageIndex = {
@@ -428,7 +347,7 @@ export function indexJsonPackage(input: unknown): JsonPackageIndex {
 export function buildJsonPackageDependencyGraph(
     index: JsonPackageIndex,
     centerKey: string,
-    maxNodes = 250
+    maxNodes = Number.POSITIVE_INFINITY
 ): MetadataGraph {
     const centerEntry = index.entriesByKey.get(centerKey);
     if (!centerEntry) {
@@ -446,12 +365,12 @@ export function buildJsonPackageDependencyGraph(
         const currentEntry = index.entriesByKey.get(fromKey);
         const currentType = currentEntry?.type;
 
-        const refs = index.refsByKey.get(fromKey) ?? [];
-        refs.forEach(ref => {
-            const toEntry = index.entriesByKey.get(ref.toKey);
-            if (!toEntry) return;
-            if (!shouldIncludeTypeForCenter(centerType, toEntry.type)) return;
-
+        const refs = sortOutgoingRefsForTraversal(
+            index.refsByKey.get(fromKey) ?? [],
+            index,
+            centerType
+        );
+        refs.forEach(({ ref }) => {
             const edgeKey = `${fromKey}|${ref.toKey}|${ref.via}`;
             if (!graphEdges.has(edgeKey)) {
                 graphEdges.set(edgeKey, { from: fromKey, to: ref.toKey, label: ref.via });
@@ -468,13 +387,13 @@ export function buildJsonPackageDependencyGraph(
             continue;
         }
 
-        const incomingRefs = index.incomingRefsByKey.get(fromKey) ?? [];
-        incomingRefs.forEach(ref => {
-            const incomingEntry = index.entriesByKey.get(ref.fromKey);
-            if (!incomingEntry) return;
-            if (!shouldIncludeTypeForCenter(centerType, incomingEntry.type)) return;
-            if (incomingEntry.type === centerType && ref.fromKey !== centerKey) return;
-
+        const incomingRefs = sortIncomingRefsForTraversal(
+            index.incomingRefsByKey.get(fromKey) ?? [],
+            index,
+            centerType,
+            centerKey
+        );
+        incomingRefs.forEach(({ ref }) => {
             const edgeKey = `${ref.fromKey}|${fromKey}|${ref.via}`;
             if (!graphEdges.has(edgeKey)) {
                 graphEdges.set(edgeKey, { from: ref.fromKey, to: fromKey, label: ref.via });
@@ -575,6 +494,40 @@ function resolveReferences(
     return Array.from(dedupe.values());
 }
 
+function sortOutgoingRefsForTraversal(
+    refs: JsonPackageReference[],
+    index: JsonPackageIndex,
+    centerType: string
+): TraversalOutgoingRef[] {
+    return refs
+        .map(ref => {
+            const toEntry = index.entriesByKey.get(ref.toKey);
+            if (!toEntry) return null;
+            if (!shouldIncludeTypeForCenter(centerType, toEntry.type)) return null;
+            return { ref, toEntry };
+        })
+        .filter((item): item is TraversalOutgoingRef => Boolean(item))
+        .sort((a, b) => compareEntriesForTraversal(a.toEntry, b.toEntry, centerType));
+}
+
+function sortIncomingRefsForTraversal(
+    refs: JsonPackageIncomingReference[],
+    index: JsonPackageIndex,
+    centerType: string,
+    centerKey: string
+): TraversalIncomingRef[] {
+    return refs
+        .map(ref => {
+            const fromEntry = index.entriesByKey.get(ref.fromKey);
+            if (!fromEntry) return null;
+            if (!shouldIncludeTypeForCenter(centerType, fromEntry.type)) return null;
+            if (fromEntry.type === centerType && ref.fromKey !== centerKey) return null;
+            return { ref, fromEntry };
+        })
+        .filter((item): item is TraversalIncomingRef => Boolean(item))
+        .sort((a, b) => compareEntriesForTraversal(a.fromEntry, b.fromEntry, centerType));
+}
+
 function buildTypeGroups(
     index: JsonPackageIndex,
     visitedKeys: Set<string>,
@@ -652,6 +605,20 @@ function compareTypeNames(a: string, b: string): number {
     const diff = getTypePriority(a) - getTypePriority(b);
     if (diff !== 0) return diff;
     return a.localeCompare(b);
+}
+
+function compareEntriesForTraversal(
+    a: JsonPackageEntry,
+    b: JsonPackageEntry,
+    centerType: string
+): number {
+    const typeDiff = compareTypeNamesForCenter(a.type, b.type, centerType);
+    if (typeDiff !== 0) return typeDiff;
+
+    const nameDiff = a.displayName.localeCompare(b.displayName);
+    if (nameDiff !== 0) return nameDiff;
+
+    return a.id.localeCompare(b.id);
 }
 
 function compareTypeNamesForCenter(a: string, b: string, centerType?: string): number {

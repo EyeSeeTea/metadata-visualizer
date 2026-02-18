@@ -33,10 +33,10 @@ describe("json-package-utils", () => {
         const graph = buildJsonPackageDependencyGraph(index, dataElement.key);
 
         const nodeTypes = graph.nodes.map(node => node.type).sort();
-        expect(nodeTypes).toEqual(["categories", "categoryCombos", "dataElements", "legendSets"]);
+        expect(nodeTypes).toEqual(["categories", "categoryCombos", "dataElements"]);
 
         const edgeLabels = graph.edges.map(edge => edge.label).sort();
-        expect(edgeLabels).toEqual(["categories", "categoryCombo", "legendSets"]);
+        expect(edgeLabels).toEqual(["categories", "categoryCombo"]);
     });
 
     it("fails with invalid package root", () => {
@@ -268,6 +268,79 @@ describe("json-package-utils", () => {
             .map(node => node.id)
             .sort();
         expect(categoryIds).toEqual(["cat1", "cat2"]);
+    });
+
+    it("prioritizes sections over dataElements when node limit is reached", () => {
+        const dataElementCount = 400;
+        const metadataPackage = {
+            dataSets: [
+                {
+                    id: "ds1",
+                    displayName: "DataSet 1",
+                    dataSetElements: Array.from({ length: dataElementCount }, (_, index) => ({
+                        dataElement: { id: `de${index}` },
+                    })),
+                    sections: [{ id: "sec1" }, { id: "sec2" }],
+                },
+            ],
+            dataElements: Array.from({ length: dataElementCount }, (_, index) => ({
+                id: `de${index}`,
+                displayName: `Data element ${index}`,
+            })),
+            sections: [
+                { id: "sec1", displayName: "Section 1" },
+                { id: "sec2", displayName: "Section 2" },
+            ],
+        };
+
+        const index = indexJsonPackage(metadataPackage);
+        const dataSet = requireFirst(index.entriesByType.dataSets, "dataSets");
+        const graph = buildJsonPackageDependencyGraph(index, dataSet.key, 250);
+
+        const sectionIds = graph.nodes
+            .filter(node => node.type === "sections")
+            .map(node => node.id)
+            .sort();
+        expect(sectionIds).toEqual(["sec1", "sec2"]);
+    });
+
+    it("keeps dashboard maps focused and avoids map expansion through indicator type hubs", () => {
+        const metadataPackage = {
+            dashboards: [
+                {
+                    id: "d1",
+                    displayName: "Dashboard 1",
+                    dashboardItems: [{ visualization: { id: "v1" } }, { map: { id: "m1" } }],
+                },
+            ],
+            visualizations: [
+                {
+                    id: "v1",
+                    displayName: "Visualization 1",
+                    dataDimensionItems: [{ id: "i1" }],
+                },
+            ],
+            indicators: [
+                { id: "i1", displayName: "Indicator 1", indicatorType: { id: "it1" } },
+                { id: "i2", displayName: "Indicator 2", indicatorType: { id: "it1" } },
+            ],
+            indicatorTypes: [{ id: "it1", displayName: "Indicator type 1" }],
+            maps: [
+                { id: "m1", displayName: "Map 1" },
+                { id: "m2", displayName: "Map 2", mapViews: [{ id: "i2" }] },
+            ],
+        };
+
+        const index = indexJsonPackage(metadataPackage);
+        const dashboard = requireFirst(index.entriesByType.dashboards, "dashboards");
+        const graph = buildJsonPackageDependencyGraph(index, dashboard.key);
+
+        const mapIds = graph.nodes
+            .filter(node => node.type === "maps")
+            .map(node => node.id)
+            .sort();
+
+        expect(mapIds).toEqual(["m1"]);
     });
 });
 
