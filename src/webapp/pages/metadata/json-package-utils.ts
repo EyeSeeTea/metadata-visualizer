@@ -296,6 +296,13 @@ export type JsonPackageIndex = {
     incomingRefsByKey: Map<string, JsonPackageIncomingReference[]>;
 };
 
+export type JsonPackageGraphMode = "expanded" | "direct";
+
+type BuildJsonPackageGraphOptions = {
+    maxNodes?: number;
+    mode?: JsonPackageGraphMode;
+};
+
 export function indexJsonPackage(input: unknown): JsonPackageIndex {
     if (!isRecord(input)) {
         throw new Error("Invalid package format: expected a JSON object");
@@ -348,24 +355,29 @@ export function indexJsonPackage(input: unknown): JsonPackageIndex {
 export function buildJsonPackageDependencyGraph(
     index: JsonPackageIndex,
     centerKey: string,
-    maxNodes = Number.POSITIVE_INFINITY
+    options: number | BuildJsonPackageGraphOptions = Number.POSITIVE_INFINITY
 ): MetadataGraph {
     const centerEntry = index.entriesByKey.get(centerKey);
     if (!centerEntry) {
         throw new Error(`Metadata item not found: ${centerKey}`);
     }
     const centerType = centerEntry.type;
+    const maxNodes =
+        typeof options === "number" ? options : options.maxNodes ?? Number.POSITIVE_INFINITY;
+    const mode: JsonPackageGraphMode =
+        typeof options === "number" ? "expanded" : options.mode ?? "expanded";
 
     const visitedKeys = new Set<string>([centerKey]);
-    const queue = [centerKey];
     const graphEdges = new Map<string, { from: string; to: string; label: string }>();
 
-    while (queue.length > 0) {
-        const fromKey = queue.shift();
-        if (!fromKey) continue;
-        const currentEntry = index.entriesByKey.get(fromKey);
-        const currentType = currentEntry?.type;
+    const addNodeToGraph = (nextKey: string): boolean => {
+        if (visitedKeys.size >= maxNodes) return false;
+        if (visitedKeys.has(nextKey)) return false;
+        visitedKeys.add(nextKey);
+        return true;
+    };
 
+    const addRefsForNode = (fromKey: string, onNewNode?: (key: string) => void) => {
         const refs = sortOutgoingRefsForTraversal(
             index.refsByKey.get(fromKey) ?? [],
             index,
@@ -377,36 +389,45 @@ export function buildJsonPackageDependencyGraph(
             if (!graphEdges.has(edgeKey)) {
                 graphEdges.set(edgeKey, { from: fromKey, to: ref.toKey, label: ref.via });
             }
-
-            if (visitedKeys.size >= maxNodes) return;
-            if (visitedKeys.has(ref.toKey)) return;
-
-            visitedKeys.add(ref.toKey);
-            queue.push(ref.toKey);
+            if (addNodeToGraph(ref.toKey)) {
+                onNewNode?.(ref.toKey);
+            }
         });
 
+        const currentType = index.entriesByKey.get(fromKey)?.type;
         if (currentType && shouldSkipIncomingForCurrentType(centerType, currentType)) {
-            continue;
+            return;
         }
 
-        const incomingRefs = sortIncomingRefsForTraversal(
+        sortIncomingRefsForTraversal(
             index.incomingRefsByKey.get(fromKey) ?? [],
             index,
             centerType,
             centerKey
-        );
-        incomingRefs.forEach(({ ref }) => {
+        ).forEach(({ ref }) => {
             const edgeKey = `${ref.fromKey}|${fromKey}|${ref.via}`;
             if (!graphEdges.has(edgeKey)) {
                 graphEdges.set(edgeKey, { from: ref.fromKey, to: fromKey, label: ref.via });
             }
-
-            if (visitedKeys.size >= maxNodes) return;
-            if (visitedKeys.has(ref.fromKey)) return;
-
-            visitedKeys.add(ref.fromKey);
-            queue.push(ref.fromKey);
+            if (addNodeToGraph(ref.fromKey)) {
+                onNewNode?.(ref.fromKey);
+            }
         });
+    };
+
+    if (mode === "direct") {
+        addRefsForNode(centerKey);
+    } else {
+        const queue = [centerKey];
+
+        while (queue.length > 0) {
+            const fromKey = queue.shift();
+            if (!fromKey) continue;
+            addRefsForNode(fromKey, key => {
+                if (key === centerKey) return;
+                queue.push(key);
+            });
+        }
     }
 
     const nodes = Array.from(visitedKeys)

@@ -353,6 +353,50 @@ describe("json-package-utils", () => {
         expect(categoryIds).toEqual(["cat1", "cat2"]);
     });
 
+    it("supports direct mode without transitive categoryCombos expansion", () => {
+        const metadataPackage = {
+            dataElements: [
+                {
+                    id: "de1",
+                    displayName: "DE 1",
+                    categoryCombo: { id: "ccDirect" },
+                },
+                {
+                    id: "de2",
+                    displayName: "DE 2",
+                    categoryCombo: { id: "ccOverride" },
+                },
+            ],
+            dataSets: [
+                {
+                    id: "ds1",
+                    displayName: "DS 1",
+                    categoryCombo: { id: "ccDefault" },
+                    dataSetElements: [
+                        { dataElement: { id: "de1" } },
+                        { dataElement: { id: "de2" }, categoryCombo: { id: "ccOverride" } },
+                    ],
+                },
+            ],
+            categoryCombos: [
+                { id: "ccDirect", displayName: "Direct combo" },
+                { id: "ccDefault", displayName: "Default combo" },
+                { id: "ccOverride", displayName: "Override combo" },
+            ],
+        };
+
+        const index = indexJsonPackage(metadataPackage);
+        const dataElement = requireFirst(index.entriesByType.dataElements, "dataElements");
+        const graph = buildJsonPackageDependencyGraph(index, dataElement.key, { mode: "direct" });
+
+        const comboIds = graph.nodes
+            .filter(node => node.type === "categoryCombos")
+            .map(node => node.id)
+            .sort();
+
+        expect(comboIds).toEqual(["ccDirect"]);
+    });
+
     it("prioritizes sections over dataElements when node limit is reached", () => {
         const dataElementCount = 400;
         const metadataPackage = {

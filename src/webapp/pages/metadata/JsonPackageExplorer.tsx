@@ -9,6 +9,7 @@ import {
     buildJsonPackageDependencyGraph,
     indexJsonPackage,
     JsonPackageEntry,
+    JsonPackageGraphMode,
     JsonPackageIndex,
 } from "$/webapp/pages/metadata/json-package-utils";
 
@@ -24,6 +25,7 @@ export const JsonPackageExplorer: React.FC = () => {
     const [selectedEntryKey, setSelectedEntryKey] = React.useState("");
     const [filter, setFilter] = React.useState("");
     const [graphView, setGraphView] = React.useState<GraphViewMode>("layout2d");
+    const [graphMode, setGraphMode] = React.useState<JsonPackageGraphMode>("direct");
 
     const loadFromText = React.useCallback((text: string) => {
         try {
@@ -99,8 +101,8 @@ export const JsonPackageExplorer: React.FC = () => {
 
     const graph = React.useMemo(() => {
         if (!loadedData || !selectedEntry) return null;
-        return buildJsonPackageDependencyGraph(loadedData, selectedEntry.key);
-    }, [loadedData, selectedEntry]);
+        return buildJsonPackageDependencyGraph(loadedData, selectedEntry.key, { mode: graphMode });
+    }, [graphMode, loadedData, selectedEntry]);
 
     const handleFocus = React.useCallback((node: GraphNode) => {
         setSelectedType(node.type);
@@ -248,6 +250,24 @@ export const JsonPackageExplorer: React.FC = () => {
                                     <option value="layout2d">{i18n.t("2D View")}</option>
                                     <option value="force3d">{i18n.t("3D Tree")}</option>
                                     <option value="timeline3d">{i18n.t("3D Timeline")}</option>
+                                </select>
+
+                                <label
+                                    className="metadata-graph__toolbar-label"
+                                    htmlFor="metadata-package-graph-mode"
+                                >
+                                    {i18n.t("Relationships")}
+                                </label>
+                                <select
+                                    id="metadata-package-graph-mode"
+                                    className="metadata-graph__select"
+                                    value={graphMode}
+                                    onChange={event =>
+                                        setGraphMode(event.target.value as JsonPackageGraphMode)
+                                    }
+                                >
+                                    <option value="direct">{i18n.t("Direct only")}</option>
+                                    <option value="expanded">{i18n.t("Expanded")}</option>
                                 </select>
                             </div>
 
