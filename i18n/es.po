@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2024-06-26T10:58:19.149Z\n"
+"POT-Creation-Date: 2026-02-13T11:28:44.684Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -14,17 +14,180 @@ msgstr "Añadir"
 msgid "List"
 msgstr "Listar"
 
+msgid "Select a row to view relationships."
+msgstr "Selecciona una fila para ver relaciones."
+
+msgid "Loading graph..."
+msgstr "Cargando grafo..."
+
+msgid "Loading..."
+msgstr "Cargando..."
+
+msgid "Load combos"
+msgstr "Cargar combinaciones"
+
+msgid "Load more"
+msgstr "Cargar más"
+
+msgid "All loaded"
+msgstr "Todo cargado"
+
+msgid "Visualization"
+msgstr "Visualización"
+
+msgid "2D View"
+msgstr "Vista 2D"
+
+msgid "3D Tree"
+msgstr "Árbol 3D"
+
+msgid "3D Timeline"
+msgstr "Línea temporal 3D"
+
+msgid "Open API"
+msgstr "Abrir API"
+
+msgid "Focus in graph"
+msgstr "Enfocar en el grafo"
+
+msgid "Colors"
+msgstr "Colores"
+
+msgid "Textures"
+msgstr "Texturas"
+
+msgid "Click to focus - Right click opens the API"
+msgstr "Haz clic para enfocar - El botón derecho abre la API"
+
+msgid "Resource type"
+msgstr "Tipo de recurso"
+
+msgid "Fields"
+msgstr "Campos"
+
+msgid "Filters (one per line or separated by ;)"
+msgstr "Filtros (uno por línea o separados por ;)"
+
+msgid "Page"
+msgstr "Página"
+
+msgid "Page size"
+msgstr "Tamaño de página"
+
+msgid "Fetch all (paging=false)"
+msgstr "Cargar todo (paging=false)"
+
+msgid "Fetch"
+msgstr "Consultar"
+
+msgid "No results"
+msgstr "Sin resultados"
+
+msgid "Avatar"
+msgstr "Avatar"
+
 msgid "Back"
 msgstr "Volver"
 
 msgid "Help"
 msgstr "Ayuda"
 
+msgid "Metadata Visualizer"
+msgstr "Visualizador de metadatos"
+
+msgid "Login {{baseUrl}}"
+msgstr "Iniciar sesión {{baseUrl}}"
+
+msgid "Base URL not found in manifest.webapp (see DHIS2-19708)"
+msgstr "No se encontró la URL base en manifest.webapp (ver DHIS2-19708)"
+
 msgid "Hello {{name}}"
 msgstr "Hola {{name}}"
 
 msgid "Detail page"
-msgstr ""
+msgstr "Página de detalle"
 
 msgid "Section"
 msgstr "Sección"
+
+msgid "Unknown JSON parsing error"
+msgstr "Error desconocido al procesar el JSON"
+
+msgid "Metadata package JSON"
+msgstr "Paquete JSON de metadatos"
+
+msgid "Metadata type"
+msgstr "Tipo de metadato"
+
+msgid "Search"
+msgstr "Buscar"
+
+msgid "Filter by id or name"
+msgstr "Filtrar por id o nombre"
+
+msgid "Select a metadata package JSON file to start"
+msgstr "Selecciona un archivo JSON de metadatos para empezar"
+
+msgid "Loading package..."
+msgstr "Cargando paquete..."
+
+msgid "{{types}} types"
+msgstr "{{types}} tipos"
+
+msgid "{{items}} items"
+msgstr "{{items}} elementos"
+
+msgid "No results for this type/filter"
+msgstr "Sin resultados para este tipo/filtro"
+
+msgid "Select a row to view dependencies"
+msgstr "Selecciona una fila para ver dependencias"
+
+msgid "Selected metadata JSON"
+msgstr "JSON de metadato seleccionado"
+
+msgid "Metadata views"
+msgstr "Vistas de metadatos"
+
+msgid "Instance Metadata"
+msgstr "Metadatos de instancia"
+
+msgid "JSON Package"
+msgstr "Paquete JSON"
+
+msgid "Loading results..."
+msgstr "Cargando resultados..."
+
+msgid "{{total}} total"
+msgstr "{{total}} en total"
+
+msgid "page {{page}} of {{pageCount}}"
+msgstr "página {{page}} de {{pageCount}}"
+
+msgid "Fetching metadata..."
+msgstr "Consultando metadatos..."
+
+msgid "Prev"
+msgstr "Anterior"
+
+msgid "Next"
+msgstr "Siguiente"
+
+#~ msgid "item"
+#~ msgstr "elemento"
+
+#~ msgid "object"
+#~ msgstr "objeto"
+
+#~ msgid "This tab will be used to upload and inspect metadata packages."
+#~ msgstr ""
+#~ "Esta pestaña se usará para cargar e inspeccionar paquetes de metadatos."
+
+#~ msgid "Choose package (coming soon)"
+#~ msgstr "Elegir paquete (próximamente)"
+
+#~ msgid ""
+#~ "Next step - wire this tab to package parsing and preview before import."
+#~ msgstr ""
+#~ "Siguiente paso - conectar esta pestaña al análisis del paquete y a la "
+#~ "vista previa antes de importar."
