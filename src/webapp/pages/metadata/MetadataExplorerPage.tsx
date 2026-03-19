@@ -10,6 +10,7 @@ import {
 import { MetadataTable } from "$/webapp/components/metadata/MetadataTable";
 import { MetadataGraphPanel } from "$/webapp/components/metadata/MetadataGraphPanel";
 import { JsonPackageExplorer } from "$/webapp/pages/metadata/JsonPackageExplorer";
+import { OrgUnitExplorerPage } from "$/webapp/pages/orgUnits/OrgUnitExplorerPage";
 import i18n from "$/utils/i18n";
 import "./MetadataExplorerPage.css";
 
@@ -136,6 +137,19 @@ export const MetadataExplorerPage: React.FC = () => {
                 >
                     {i18n.t("JSON Package")}
                 </button>
+                <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === "orgUnits"}
+                    className={
+                        activeTab === "orgUnits"
+                            ? "metadata-tab metadata-tab--active"
+                            : "metadata-tab"
+                    }
+                    onClick={() => setActiveTab("orgUnits")}
+                >
+                    {i18n.t("OrgUnit Explorer")}
+                </button>
             </div>
 
             {activeTab === "instance" ? (
@@ -214,16 +228,18 @@ export const MetadataExplorerPage: React.FC = () => {
                         </div>
                     </div>
                 </>
-            ) : (
+            ) : activeTab === "load" ? (
                 <div className="metadata-import" role="tabpanel" aria-label={i18n.t("JSON Package")}>
                     <JsonPackageExplorer />
                 </div>
+            ) : (
+                <OrgUnitExplorerPage />
             )}
         </div>
     );
 };
 
-type ExplorerTab = "instance" | "load";
+type ExplorerTab = "instance" | "load" | "orgUnits";
 
 type ListState =
     | { type: "idle" }
