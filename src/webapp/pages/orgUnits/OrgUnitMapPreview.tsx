@@ -1,144 +1,109 @@
 import React from "react";
-import { OrgUnit } from "$/domain/orgUnits/OrgUnit";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { OrgUnit, extractPolygons, getGeographicCenter } from "$/domain/orgUnits/OrgUnit";
 import i18n from "$/utils/i18n";
+
+const defaultIcon = new L.Icon({
+    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+});
 
 type OrgUnitMapPreviewProps = {
     orgUnit: OrgUnit;
 };
 
 export const OrgUnitMapPreview: React.FC<OrgUnitMapPreviewProps> = ({ orgUnit }) => {
-    const hasGeometry = orgUnit.geometry != null;
-    const hasCoordinates = orgUnit.coordinates != null;
-    const hasLocation = hasGeometry || hasCoordinates;
+    const { center, hasData } = getGeographicCenter(orgUnit);
 
     return (
         <div className="orgunit-map">
             <h3 className="orgunit-map__title">{i18n.t("Geographic preview")}</h3>
 
-            {!hasLocation && (
+            {!hasData ? (
                 <div className="orgunit-map__empty">
                     {i18n.t("No geographic data available for this organisation unit")}
                 </div>
-            )}
-
-            {hasGeometry && orgUnit.geometry && (
+            ) : (
                 <div className="orgunit-map__canvas">
-                    <GeometryRenderer geometry={orgUnit.geometry} />
-                </div>
-            )}
-
-            {!hasGeometry && hasCoordinates && orgUnit.coordinates && (
-                <div className="orgunit-map__canvas">
-                    <PointRenderer
-                        latitude={orgUnit.coordinates.latitude}
-                        longitude={orgUnit.coordinates.longitude}
-                    />
+                    <LeafletMap orgUnit={orgUnit} center={center} />
                 </div>
             )}
         </div>
     );
 };
 
-type GeometryRendererProps = {
-    geometry: NonNullable<OrgUnit["geometry"]>;
+const LeafletMap: React.FC<{ orgUnit: OrgUnit; center: [number, number] }> = ({
+    orgUnit,
+    center,
+}) => {
+    const containerRef = React.useRef<HTMLDivElement>(null);
+    const mapRef = React.useRef<L.Map | null>(null);
+
+    React.useEffect(() => {
+        if (!containerRef.current) return;
+
+        const isPolygon =
+            orgUnit.geometry?.type === "Polygon" || orgUnit.geometry?.type === "MultiPolygon";
+
+        const map = L.map(containerRef.current).setView(center, isPolygon ? 6 : 10);
+        mapRef.current = map;
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution:
+                '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        }).addTo(map);
+
+        renderOrgUnitGeography(map, orgUnit);
+
+        return () => {
+            map.remove();
+            mapRef.current = null;
+        };
+    }, [orgUnit, center]);
+
+    return <div ref={containerRef} style={{ width: "100%", height: "100%" }} />;
 };
 
-const GeometryRenderer: React.FC<GeometryRendererProps> = ({ geometry }) => {
-    const polygons = React.useMemo(() => extractPolygons(geometry), [geometry]);
+function renderOrgUnitGeography(map: L.Map, orgUnit: OrgUnit): void {
+    const geometry = orgUnit.geometry;
+    const coordinates = orgUnit.coordinates;
 
-    if (polygons.length === 0) {
+    if (geometry) {
         if (geometry.type === "Point") {
-            const coords = geometry.coordinates as [number, number];
-            return <PointRenderer longitude={coords[0]} latitude={coords[1]} />;
+            const [lng, lat] = geometry.coordinates as [number, number];
+            L.marker([lat, lng], { icon: defaultIcon }).addTo(map);
+            return;
         }
-        return (
-            <div className="orgunit-map__empty">
-                {i18n.t("No geographic data available for this organisation unit")}
-            </div>
-        );
+
+        const polygons = extractPolygons(geometry);
+        const allLatLngs: L.LatLng[] = [];
+
+        polygons.forEach(ring => {
+            const positions: L.LatLngExpression[] = ring.map(
+                ([lng, lat]) => [lat, lng] as [number, number]
+            );
+            L.polygon(positions, {
+                color: "#2c73ff",
+                fillColor: "rgba(44, 115, 255, 0.25)",
+                weight: 2,
+            }).addTo(map);
+
+            ring.forEach(([lng, lat]) => allLatLngs.push(L.latLng(lat, lng)));
+        });
+
+        if (allLatLngs.length > 0) {
+            map.fitBounds(L.latLngBounds(allLatLngs), { padding: [30, 30] });
+        }
+        return;
     }
 
-    const allPoints = polygons.flat();
-    const lngs = allPoints.map(p => p[0]);
-    const lats = allPoints.map(p => p[1]);
-    const minLng = Math.min(...lngs);
-    const maxLng = Math.max(...lngs);
-    const minLat = Math.min(...lats);
-    const maxLat = Math.max(...lats);
-
-    const padding = 20;
-    const width = 500;
-    const height = 400;
-    const innerW = width - padding * 2;
-    const innerH = height - padding * 2;
-
-    const rangeLng = maxLng - minLng || 1;
-    const rangeLat = maxLat - minLat || 1;
-    const scale = Math.min(innerW / rangeLng, innerH / rangeLat);
-
-    const toSvg = (lng: number, lat: number): [number, number] => {
-        const x = padding + (lng - minLng) * scale;
-        const y = padding + (maxLat - lat) * scale;
-        return [x, y];
-    };
-
-    return (
-        <svg
-            viewBox={`0 0 ${width} ${height}`}
-            style={{ width: "100%", height: "100%", background: "#f0f4f8" }}
-        >
-            {polygons.map((ring, idx) => {
-                const points = ring.map(([lng, lat]) => toSvg(lng, lat));
-                const d = points.map((p, i) => `${i === 0 ? "M" : "L"}${p[0]},${p[1]}`).join(" ") + " Z";
-                return (
-                    <path
-                        key={idx}
-                        d={d}
-                        fill="rgba(44, 115, 255, 0.25)"
-                        stroke="#2c73ff"
-                        strokeWidth={1.5}
-                    />
-                );
-            })}
-        </svg>
-    );
-};
-
-type PointRendererProps = {
-    latitude: number;
-    longitude: number;
-};
-
-const PointRenderer: React.FC<PointRendererProps> = ({ latitude, longitude }) => {
-    return (
-        <svg
-            viewBox="0 0 500 400"
-            style={{ width: "100%", height: "100%", background: "#f0f4f8" }}
-        >
-            <circle cx={250} cy={180} r={8} fill="#2c73ff" stroke="#1b5ed6" strokeWidth={2} />
-            <text x={250} y={220} textAnchor="middle" fontSize={13} fill="#40506b">
-                {`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`}
-            </text>
-            <text x={250} y={240} textAnchor="middle" fontSize={11} fill="#8c97a9">
-                {i18n.t("Point location")}
-            </text>
-        </svg>
-    );
-};
-
-type Coord = [number, number];
-
-function extractPolygons(geometry: NonNullable<OrgUnit["geometry"]>): Coord[][] {
-    switch (geometry.type) {
-        case "Polygon": {
-            const rings = geometry.coordinates as Coord[][];
-            return rings;
-        }
-        case "MultiPolygon": {
-            const multiRings = geometry.coordinates as Coord[][][];
-            return multiRings.flat();
-        }
-        default:
-            return [];
+    if (coordinates) {
+        L.marker([coordinates.latitude, coordinates.longitude], { icon: defaultIcon }).addTo(map);
     }
 }

@@ -5,8 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2026-02-13T11:28:44.684Z\n"
-"PO-Revision-Date: 2026-02-13T11:28:44.684Z\n"
+"POT-Creation-Date: 2026-03-19T15:07:27.824Z\n"
+"PO-Revision-Date: 2026-03-19T15:07:27.824Z\n"
 
 msgid "Add"
 msgstr ""
@@ -140,6 +140,15 @@ msgstr ""
 msgid "No results for this type/filter"
 msgstr ""
 
+msgid "Relationships"
+msgstr ""
+
+msgid "Direct only"
+msgstr ""
+
+msgid "Expanded"
+msgstr ""
+
 msgid "Select a row to view dependencies"
 msgstr ""
 
@@ -153,6 +162,9 @@ msgid "Instance Metadata"
 msgstr ""
 
 msgid "JSON Package"
+msgstr ""
+
+msgid "OrgUnit Explorer"
 msgstr ""
 
 msgid "Loading results..."
@@ -171,4 +183,52 @@ msgid "Prev"
 msgstr ""
 
 msgid "Next"
+msgstr ""
+
+msgid "UID"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "Short name"
+msgstr ""
+
+msgid "Level"
+msgstr ""
+
+msgid "Parent"
+msgstr ""
+
+msgid "Opening date"
+msgstr ""
+
+msgid "Closed date"
+msgstr ""
+
+msgid "Latitude"
+msgstr ""
+
+msgid "Longitude"
+msgstr ""
+
+msgid "Path"
+msgstr ""
+
+msgid "Path (UIDs)"
+msgstr ""
+
+msgid "Path (names)"
+msgstr ""
+
+msgid "Path (short names)"
+msgstr ""
+
+msgid "Organisation Unit UID"
+msgstr ""
+
+msgid "Geographic preview"
+msgstr ""
+
+msgid "No geographic data available for this organisation unit"
 msgstr ""

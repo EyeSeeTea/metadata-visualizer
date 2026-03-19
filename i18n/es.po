@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2026-02-13T11:28:44.684Z\n"
+"POT-Creation-Date: 2026-03-19T15:07:27.824Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -140,6 +140,15 @@ msgstr "{{items}} elementos"
 msgid "No results for this type/filter"
 msgstr "Sin resultados para este tipo/filtro"
 
+msgid "Relationships"
+msgstr ""
+
+msgid "Direct only"
+msgstr ""
+
+msgid "Expanded"
+msgstr ""
+
 msgid "Select a row to view dependencies"
 msgstr "Selecciona una fila para ver dependencias"
 
@@ -154,6 +163,9 @@ msgstr "Metadatos de instancia"
 
 msgid "JSON Package"
 msgstr "Paquete JSON"
+
+msgid "OrgUnit Explorer"
+msgstr ""
 
 msgid "Loading results..."
 msgstr "Cargando resultados..."
@@ -172,6 +184,54 @@ msgstr "Anterior"
 
 msgid "Next"
 msgstr "Siguiente"
+
+msgid "UID"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "Short name"
+msgstr ""
+
+msgid "Level"
+msgstr ""
+
+msgid "Parent"
+msgstr ""
+
+msgid "Opening date"
+msgstr ""
+
+msgid "Closed date"
+msgstr ""
+
+msgid "Latitude"
+msgstr ""
+
+msgid "Longitude"
+msgstr ""
+
+msgid "Path"
+msgstr ""
+
+msgid "Path (UIDs)"
+msgstr ""
+
+msgid "Path (names)"
+msgstr ""
+
+msgid "Path (short names)"
+msgstr ""
+
+msgid "Organisation Unit UID"
+msgstr ""
+
+msgid "Geographic preview"
+msgstr ""
+
+msgid "No geographic data available for this organisation unit"
+msgstr ""
 
 #~ msgid "item"
 #~ msgstr "elemento"
