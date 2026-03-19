@@ -1,6 +1,6 @@
 {
-    "name": "dhis2-app-skeleton",
-    "description": "DHIS2 Skeleton App",
+    "name": "Metadata-visualizer",
+    "description": "DHIS2 metadata visualization app",
     "version": "0.0.1",
     "license": "GPL-3.0",
     "author": "EyeSeeTea team",
@@ -9,8 +9,11 @@
         "type": "git",
         "url": "git+https://github.com/eyeseetea/dhis2-app-skeleton.git"
     },
+    "engines": {
+        "node": ">=22 <23",
+        "yarn": "^4.12.0"
+    },
     "dependencies": {
-        "$": "link:./src",
         "@dhis2/app-runtime": "^3",
         "@dhis2/d2-i18n": "^1",
         "@dhis2/d2-i18n-extract": "^1",
@@ -19,26 +22,33 @@
         "@eyeseetea/d2-api": "^1",
         "@eyeseetea/d2-ui-components": "^2",
         "@eyeseetea/feedback-component": "^0",
+        "@local/src": "link:./src",
         "@material-ui/core": "^4",
         "@material-ui/icons": "^4",
         "@material-ui/styles": "^4",
+        "@noble/hashes": "^1.4.0",
+        "@types/leaflet": "^1.9.21",
         "d2-manifest": "^1",
+        "leaflet": "^1.9.4",
         "material-ui": "0.20.2",
         "md5.js": ">=1",
         "purify-ts": "^1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
+        "react-force-graph-3d": "^1.29.0",
         "react-router-dom": "5.2.0",
         "real-cancellable-promise": ">=1",
         "styled-components": "^6",
         "styled-jsx": "^5",
+        "three": "^0.182.0",
         "typed-immutable-map": ">=0"
     },
     "devDependencies": {
         "@testing-library/jest-dom": "^5.16.5",
         "@testing-library/react": "^14.0.0",
+        "@types/archiver": "^6.0.3",
         "@types/material-ui": "^0.21.12",
-        "@types/node": "^20",
+        "@types/node": "^22",
         "@types/react": "18.2.22",
         "@types/react-dom": "^18.2.7",
         "@types/react-router-dom": "5.3.3",
@@ -46,7 +56,9 @@
         "@typescript-eslint/eslint-plugin": "5.62.0",
         "@typescript-eslint/parser": "5.62.0",
         "@vitejs/plugin-react": "^3.1.0",
+        "archiver": "^6.0.2",
         "cmd-ts": "^0",
+        "cross-env": "^7.0.3",
         "depcheck": "^1.4.7",
         "eslint": "^8.37.0",
         "eslint-config-react-app": "7.1.0-next.14",
@@ -60,6 +72,8 @@
         "jsdom": "^21",
         "node-stdlib-browser": "^1",
         "prettier": "^2",
+        "rimraf": "^5.0.5",
+        "shx": "^0.3.4",
         "source-map-explorer": "^2",
         "ts-prune": "^0",
         "tsx": "^4.19.3",
@@ -86,18 +100,18 @@
         "test-unit-watch": "vitest watch",
         "postinstall": "yarn localize",
         "manifest": "d2-manifest package.json build/manifest.webapp",
-        "build-folder": "rm -rf build/ && d2-manifest package.json manifest.webapp && tsc && vite build --outDir=build && yarn run manifest && cp -r i18n icon.png build",
-        "build": "yarn localize && VITE_DHIS2_BASE_URL='' VITE_DHIS2_AUTH='' yarn build-folder && rm -f $npm_package_name.zip && cd build && zip --quiet -r ../$npm_package_name.zip *",
+        "build-folder": "rimraf build && d2-manifest package.json manifest.webapp && tsc && vite build --outDir=build && yarn run manifest && shx cp -r i18n icon.png build",
+        "build": "yarn localize && cross-env VITE_DHIS2_BASE_URL= DHIS2_AUTH= yarn build-folder && yarn run-script src/scripts/zip-build.ts",
         "prettify": "prettier \"./**/*.{js,jsx,json,css,ts,tsx}\" --write",
         "extract-pot": "yarn d2-i18n-extract -p src/ -o i18n/",
         "localize": "yarn update-po && d2-i18n-generate -l -n dhis2-skeleton-app -p ./i18n/ -o ./src/locales/",
-        "update-po": "yarn extract-pot && find i18n/ -name '*.po' -exec msgmerge --backup=off -U {} i18n/en.pot \\;",
+        "update-po": "yarn extract-pot && yarn run-script src/scripts/update-po.ts",
         "prepare": "husky install",
         "script-example": "yarn run-script src/scripts/example.ts"
     },
     "manifest.webapp": {
-        "name": "DHIS2 Skeleton App",
-        "description": "DHIS2 Skeleton App",
+        "name": "Metadata Visualizer",
+        "description": "DHIS2 metadata visualization app",
         "icons": {
             "48": "icon.png"
         },
@@ -110,5 +124,6 @@
                 "href": "*"
             }
         }
-    }
+    },
+    "packageManager": "yarn@4.12.0"
 }
