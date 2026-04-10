@@ -1,0 +1,24 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command // \"\"' | grep -qE '^git commit' || echo '{\"decision\":\"allow\",\"suppressOutput\":true}'",
+            "timeout": 5,
+            "statusMessage": "Checking if commit..."
+          },
+          {
+            "type": "agent",
+            "prompt": "You are a pre-commit architecture reviewer for the Metadata Visualizer (DHIS2 React+TypeScript app using Clean Architecture: domain → application → data → webapp). The tool input is: $ARGUMENTS\n\nFirst check: does tool_input.command start with 'git commit'? If NOT, immediately return {\"decision\":\"allow\"} and do nothing else.\n\nIf it IS a git commit, review the staged changes by running: git diff --staged\n\nThen check ONLY these critical rules (read .claude/CLAUDE.md for full context):\n\n1. ARCHITECTURE: Does the code respect the dependency rule? src/domain/ must import NO React, @dhis2/*, @eyeseetea/d2-api, or I/O. src/application/ must import ONLY from src/domain/. src/webapp/ must NOT import from src/data/ nor call @eyeseetea/d2-api or fetch directly — it consumes use cases via CompositionRoot.\n2. IMPORTS: Are all cross-layer imports using the $/ path alias? No relative ../../domain-style imports.\n3. FUNCTIONAL STYLE: Are there for loops with mutable accumulators (push, let counter) that should be map/flatMap/filter/reduce/Object.fromEntries? Are use cases throwing where they should return purify-ts Either/Future?\n4. TEST QUALITY: Are there weak assertions (toBeDefined, toBeTruthy, toHaveProperty) when a concrete value is knowable? Are component tests mocking @eyeseetea/d2-api directly instead of faking at the repository / CompositionRoot boundary?\n5. DUPLICATION: Is logic copy-pasted between files instead of extracted into a shared function, hook, or use case?\n6. SEPARATION: Is business logic leaking into the webapp (presentation/wiring) layer? Are raw d2-api types leaking into application/ or domain/?\n7. i18n: Are new user-facing strings wrapped in i18n.t(...) from @dhis2/d2-i18n?\n\nIf you find critical violations (especially #1 architecture bypass or #2 import rule), output JSON: {\"decision\":\"block\",\"reason\":\"[description of violations]\"}\nIf only minor suggestions, output: {\"decision\":\"allow\",\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"Pre-commit review notes: [suggestions]\"}}\nIf no issues, output: {\"decision\":\"allow\"}",
+            "model": "claude-sonnet-4-6",
+            "timeout": 120,
+            "statusMessage": "Reviewing staged changes..."
+          }
+        ]
+      }
+    ]
+  }
+}
