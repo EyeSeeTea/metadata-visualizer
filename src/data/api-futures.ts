@@ -9,7 +9,12 @@ export function promiseToFuture<Data>(
         promiseFactory(controller.signal)
             .then(resolve)
             .catch((err: unknown) => {
-                if (isAbortError(err)) {
+                // Once the signal is aborted, any error that comes back is a consequence
+                // of that abort. @dhis2/app-runtime's DataEngine surfaces aborts as a
+                // generic "An unknown network error occurred" rather than a DOMException
+                // with name === "AbortError", so checking the error shape alone is not
+                // enough — the signal state is the source of truth.
+                if (controller.signal.aborted || isAbortError(err)) {
                     throw Future.cancel();
                 }
                 if (err instanceof Error) {

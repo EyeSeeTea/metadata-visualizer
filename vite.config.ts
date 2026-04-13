@@ -1,5 +1,5 @@
 /// <reference types="vitest" />
-import { UserConfig, defineConfig, loadEnv } from "vite";
+import { ProxyOptions, UserConfig, defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import checker from "vite-plugin-checker";
 import nodePolyfills from "vite-plugin-node-stdlib-browser";
@@ -64,17 +64,14 @@ function getProxy(env: Record<string, string>) {
         console.error(`Set ${dhis2UrlVar}`);
         process.exit(1);
     } else {
-        const proxy: Record<string, any> = {
+        const proxy: Record<string, ProxyOptions> = {
             "/dhis2": {
                 target: targetUrl,
                 changeOrigin: true,
                 rewrite: path => path.replace(/^\/dhis2/, ""),
+                ...(auth ? { auth } : {}),
             },
         };
-
-        if (auth) {
-            proxy["/dhis2"].auth = auth;
-        }
 
         return proxy;
     }

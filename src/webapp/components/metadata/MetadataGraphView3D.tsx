@@ -1,3 +1,7 @@
+// Polyfill must be imported before three / react-force-graph-3d so that
+// `self.GPUShaderStage` is truthy when the upstream module-level polyfill runs.
+// See `./webgpu-polyfill.ts` for the full explanation.
+import "$/webapp/components/metadata/webgpu-polyfill";
 import React from "react";
 import ForceGraph3D, {
     ForceGraphMethods,
@@ -35,12 +39,25 @@ type MetadataGraphView3DProps = {
     layoutMode?: "radial" | "timeline";
 };
 
-const textureLoader = new THREE.TextureLoader();
-const textureCache = new Map<string, THREE.Texture>();
-const texturePromises = new Map<string, Promise<THREE.Texture>>();
-const geometryCache = new Map<number, THREE.BoxGeometry>();
+type ThreeCaches = {
+    textureLoader: THREE.TextureLoader;
+    textureByKey: Map<string, THREE.Texture>;
+    texturePromises: Map<string, Promise<THREE.Texture>>;
+    geometryBySize: Map<number, THREE.BoxGeometry>;
+    materials: Set<THREE.Material>;
+};
 
-export const MetadataGraphView3D: React.FC<MetadataGraphView3DProps> = ({
+function createCaches(): ThreeCaches {
+    return {
+        textureLoader: new THREE.TextureLoader(),
+        textureByKey: new Map(),
+        texturePromises: new Map(),
+        geometryBySize: new Map(),
+        materials: new Set(),
+    };
+}
+
+const MetadataGraphView3D: React.FC<MetadataGraphView3DProps> = ({
     graph,
     onOpenApi,
     onFocus,
@@ -48,16 +65,23 @@ export const MetadataGraphView3D: React.FC<MetadataGraphView3DProps> = ({
 }) => {
     const graphRef = React.useRef<ForceGraphMethods<ForceNode, ForceLink>>();
     const containerRef = React.useRef<HTMLDivElement | null>(null);
+    const cachesRef = React.useRef<ThreeCaches | null>(null);
+    if (cachesRef.current === null) {
+        cachesRef.current = createCaches();
+    }
     const [size, setSize] = React.useState({ width: 0, height: 420 });
     const [useTexture, setUseTexture] = React.useState(true);
 
     const nodeThreeObject = React.useCallback((node: ForceNode) => {
+        const caches = cachesRef.current;
+        if (!caches) throw new Error("Three.js caches not initialized");
         const cubeSize = Math.max(6, node.val * 1.2);
-        const geometry = getCubeGeometry(cubeSize);
+        const geometry = getCubeGeometry(caches, cubeSize);
         const material = new THREE.MeshLambertMaterial({ color: "#64748b" });
+        caches.materials.add(material);
         const mesh = new THREE.Mesh(geometry, material);
 
-        getNodeTexture(node)
+        getNodeTexture(caches, node)
             .then(texture => {
                 material.map = texture;
                 material.needsUpdate = true;
@@ -108,6 +132,22 @@ export const MetadataGraphView3D: React.FC<MetadataGraphView3DProps> = ({
         graphRef.current.zoomToFit(600, 60);
         graphRef.current.cameraPosition({ x: 0, y: 0, z: 320 }, { x: 0, y: 0, z: 0 }, 800);
     }, [forceData, size]);
+
+    // Dispose all GPU resources on unmount.
+    React.useEffect(() => {
+        return () => {
+            const caches = cachesRef.current;
+            if (!caches) return;
+            caches.textureByKey.forEach(texture => texture.dispose());
+            caches.textureByKey.clear();
+            caches.texturePromises.clear();
+            caches.geometryBySize.forEach(geometry => geometry.dispose());
+            caches.geometryBySize.clear();
+            caches.materials.forEach(material => material.dispose());
+            caches.materials.clear();
+            cachesRef.current = null;
+        };
+    }, []);
 
     const handleFocus = React.useCallback(
         (node: ForceNode) => {
@@ -170,6 +210,11 @@ export const MetadataGraphView3D: React.FC<MetadataGraphView3DProps> = ({
         </div>
     );
 };
+
+// Default export enables React.lazy(() => import("./MetadataGraphView3D")).
+// This prevents top-level `import * as THREE from "three"` from executing until the
+// user actually opens the 3D view, so browsers without WebGL/WebGPU keep working.
+export default MetadataGraphView3D;
 
 function toForceGraphData(
     graph: MetadataGraph,
@@ -265,51 +310,44 @@ function orientEdge(edge: GraphEdge, centerKey: string) {
     return { source: edge.from, target: edge.to };
 }
 
-function getCubeGeometry(size: number): THREE.BoxGeometry {
-    const cached = geometryCache.get(size);
+function getCubeGeometry(caches: ThreeCaches, size: number): THREE.BoxGeometry {
+    const cached = caches.geometryBySize.get(size);
     if (cached) return cached;
     const geometry = new THREE.BoxGeometry(size, size, size);
-    geometryCache.set(size, geometry);
+    caches.geometryBySize.set(size, geometry);
     return geometry;
 }
 
-function getNodeTexture(node: ForceNode): Promise<THREE.Texture> {
+function getNodeTexture(caches: ThreeCaches, node: ForceNode): Promise<THREE.Texture> {
     const key = node.id;
-    const cached = textureCache.get(key);
+    const cached = caches.textureByKey.get(key);
     if (cached) return Promise.resolve(cached);
 
-    const inFlight = texturePromises.get(key);
+    const inFlight = caches.texturePromises.get(key);
     if (inFlight) return inFlight;
 
     const promise = sha256Hex(identiconSeed(node.type, node.raw.id))
         .then(hash => buildIdenticonSvg(hash, 64).svg)
-        .then(svg => loadSvgTexture(svg))
+        .then(svg => loadSvgTexture(caches, svg))
         .then(texture => {
-            textureCache.set(key, texture);
+            caches.textureByKey.set(key, texture);
             return texture;
         })
         .finally(() => {
-            texturePromises.delete(key);
+            caches.texturePromises.delete(key);
         });
 
-    texturePromises.set(key, promise);
+    caches.texturePromises.set(key, promise);
     return promise;
 }
 
-function loadSvgTexture(svg: string): Promise<THREE.Texture> {
+function loadSvgTexture(caches: ThreeCaches, svg: string): Promise<THREE.Texture> {
     const url = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
     return new Promise((resolve, reject) => {
-        textureLoader.load(
+        caches.textureLoader.load(
             url,
-            (texture: THREE.Texture) => {
-                const srgb = (THREE as typeof THREE & { SRGBColorSpace?: string }).SRGBColorSpace;
-                if (srgb) {
-                    texture.colorSpace = srgb;
-                } else if ((THREE as typeof THREE & { sRGBEncoding?: number }).sRGBEncoding) {
-                    (texture as THREE.Texture & { encoding?: number }).encoding = (
-                        THREE as typeof THREE & { sRGBEncoding?: number }
-                    ).sRGBEncoding;
-                }
+            texture => {
+                texture.colorSpace = THREE.SRGBColorSpace;
                 resolve(texture);
             },
             undefined,

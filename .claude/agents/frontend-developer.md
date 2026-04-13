@@ -35,7 +35,7 @@ that visualizes metadata as interactive 3D graphs.
 - Review existing components in `src/webapp/components/` and pages in `src/webapp/pages/`
   to maintain consistency
 - Check the repository interfaces in `src/domain/repositories/` and use cases in
-  `src/application/` to understand the data shapes the presentation layer receives
+  `src/domain/usecases/` to understand the data shapes the presentation layer receives
 
 ## Tech Stack
 
@@ -53,14 +53,18 @@ that visualizes metadata as interactive 3D graphs.
 
 ## Architecture
 
-This project uses Clean Architecture. Your work lives in `src/webapp/`. The other layers
-(`domain/`, `application/`, `data/`) are owned by the DHIS2-integration developer but you
-must understand them because you consume their use cases.
+This project uses Clean Architecture (EyeSeeTea flavor: **use cases live inside
+`src/domain/usecases/`** — there is NO `src/application/` folder). Your work lives in
+`src/webapp/`. The other layers (`domain/`, `data/`) are owned by the DHIS2-integration
+developer but you must understand them because you consume their use cases.
 
 ```
 src/
-├── domain/              # Entities + repository interfaces (NEVER import from webapp)
-├── application/         # Use cases (invoked from webapp via CompositionRoot)
+├── domain/              # Pure TS — entities, repositories, use cases
+│   ├── entities/
+│   ├── metadata/
+│   ├── repositories/    # interfaces
+│   └── usecases/        # use cases (invoked from webapp via CompositionRoot)
 ├── data/                # DHIS2 repository implementations (NEVER import from webapp)
 ├── webapp/              # ← YOUR HOME
 │   ├── components/      # Reusable presentational components
@@ -84,15 +88,18 @@ src/
 
 - **Components contain ZERO business logic.** They render state and forward user events.
   All data fetching, transformation, and orchestration happens in use cases under
-  `src/application/`, invoked via hooks in `src/webapp/`.
-- **Never import from `@eyeseetea/d2-api` in `webapp/`.** Components and hooks call use
-  cases exposed by `CompositionRoot`. If you need a new DHIS2 query, request it from the
-  DHIS2-integration developer — do not reach into `data/`.
-- **Never import from `src/data/` in `webapp/`.** Only `domain/` types and `application/`
-  use cases are legal imports for presentation code.
+  `src/domain/usecases/`, invoked via hooks in `src/webapp/`.
+- **Never import from `@eyeseetea/d2-api` or `@dhis2/app-runtime`'s `DataEngine` in
+  `webapp/`.** Components and hooks call use cases exposed by `CompositionRoot`. If you
+  need a new DHIS2 query, request it from the DHIS2-integration developer — do not reach
+  into `data/`.
+- **Never import from `src/data/` in `webapp/`.** Only `domain/` types and
+  `domain/usecases/` are legal imports for presentation code.
+- **Never create a `src/application/` folder.** Use cases belong under
+  `src/domain/usecases/`.
 - **Use the `$/` path alias** for all imports — no `../../...` across layers.
 - **Pure presentation utilities** go in `src/webapp/utils/`. Cross-cutting pure helpers
-  (shared with `domain`/`application`) go in `src/utils/`.
+  (shared with `domain/`) go in `src/utils/`.
 
 ## Standards
 

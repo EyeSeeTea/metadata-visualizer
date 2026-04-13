@@ -1,18 +1,18 @@
-import type { DataEngine } from "./types/dhis2-app-runtime";
-import { BuildMetadataGraphUseCase } from "./application/metadata/BuildMetadataGraphUseCase";
-import { ListCategoryOptionCombosUseCase } from "./application/metadata/ListCategoryOptionCombosUseCase";
-import { ListMetadataUseCase } from "./application/metadata/ListMetadataUseCase";
-import { GetUiLocaleUseCase } from "./application/system/GetUiLocaleUseCase";
-import { GetCurrentUserUseCase } from "./application/users/GetCurrentUserUseCase";
-import { MetadataDhis2Repository } from "./data/repositories/MetadataDhis2Repository";
-import { MetadataTestRepository } from "./data/repositories/MetadataTestRepository";
-import { SystemDhis2Repository } from "./data/repositories/SystemDhis2Repository";
-import { SystemTestRepository } from "./data/repositories/SystemTestRepository";
-import { UserDhis2Repository } from "./data/repositories/UserDhis2Repository";
-import { UserTestRepository } from "./data/repositories/UserTestRepository";
-import { MetadataRepository } from "./domain/repositories/MetadataRepository";
-import { SystemRepository } from "./domain/repositories/SystemRepository";
-import { UserRepository } from "./domain/repositories/UserRepository";
+import type { DataEngine } from "$/types/dhis2-app-runtime";
+import { MetadataDhis2Repository } from "$/data/repositories/MetadataDhis2Repository";
+import { MetadataTestRepository } from "$/data/repositories/MetadataTestRepository";
+import { SystemDhis2Repository } from "$/data/repositories/SystemDhis2Repository";
+import { SystemTestRepository } from "$/data/repositories/SystemTestRepository";
+import { UserDhis2Repository } from "$/data/repositories/UserDhis2Repository";
+import { UserTestRepository } from "$/data/repositories/UserTestRepository";
+import { MetadataRepository } from "$/domain/repositories/MetadataRepository";
+import { SystemRepository } from "$/domain/repositories/SystemRepository";
+import { UserRepository } from "$/domain/repositories/UserRepository";
+import { BuildMetadataGraphUseCase } from "$/domain/usecases/metadata/BuildMetadataGraphUseCase";
+import { ListCategoryOptionCombosUseCase } from "$/domain/usecases/metadata/ListCategoryOptionCombosUseCase";
+import { ListMetadataUseCase } from "$/domain/usecases/metadata/ListMetadataUseCase";
+import { GetUiLocaleUseCase } from "$/domain/usecases/system/GetUiLocaleUseCase";
+import { GetCurrentUserUseCase } from "$/domain/usecases/users/GetCurrentUserUseCase";
 
 export type CompositionRoot = ReturnType<typeof getCompositionRoot>;
 

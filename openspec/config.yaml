@@ -23,16 +23,16 @@ context: |
   - purify-ts (Either / Maybe / Future for functional error handling)
   - real-cancellable-promise (async cancellation), typed-immutable-map
 
-  Directory structure (Clean Architecture):
+  Directory structure (Clean Architecture, EyeSeeTea convention):
   - src/
-    - domain/            # Entities and repository interfaces (no framework, no I/O)
-      - entities/
-      - metadata/
-      - repositories/    # Interfaces only
-    - application/       # Use cases orchestrating domain and repositories
-      - metadata/
-      - system/
-      - users/
+    - domain/            # Domain layer (pure TS, no framework, no I/O)
+      - entities/        # Value objects and domain types
+      - metadata/        # Metadata-specific domain helpers
+      - repositories/    # Repository interfaces only
+      - usecases/        # Use cases — orchestrate repositories (NO separate `application/`)
+        - metadata/
+        - system/
+        - users/
     - data/              # Concrete repository implementations (DHIS2 API adapters)
       - repositories/
     - webapp/            # Presentation layer (React)
@@ -90,12 +90,16 @@ context: |
   - Testing-Library: prefer accessible queries (`getByRole`, `getByLabelText`),
     `await` async queries, use `screen.*` entry points.
 
-  Architecture: Clean Architecture with strict layered dependencies
-  - Layers (inner → outer): `domain` ← `application` ← `data` ← `webapp`
-  - `domain/` has zero dependencies on DHIS2, React, I/O, or any framework.
-  - `application/` depends only on `domain/` (uses repository interfaces).
-  - `data/` implements `domain/repositories/` interfaces against the DHIS2 Web API
-    via `@eyeseetea/d2-api`. All network / persistence calls live here.
+  Architecture: Clean Architecture (EyeSeeTea flavor — use cases live inside domain)
+  - Layers (inner → outer): `domain` ← `data` ← `webapp`
+  - `domain/` has zero dependencies on DHIS2, React, I/O, or any framework. It contains:
+      - `domain/entities/` — pure value objects and types
+      - `domain/repositories/` — interfaces (the contract with the outside world)
+      - `domain/usecases/` — use cases orchestrating repositories and entities
+    There is NO top-level `application/` folder — this is an EyeSeeTea convention shared
+    across all DHIS2 apps in the organization.
+  - `data/` implements `domain/repositories/` interfaces against the DHIS2 Web API. All
+    network / persistence calls live here. Raw DHIS2 payloads never leak out of `data/`.
   - `webapp/` is wiring + presentation only: components, pages, contexts, hooks.
     No business logic, no direct API calls — it consumes use cases through the
     `CompositionRoot`.
@@ -113,7 +117,8 @@ context: |
   Non-goals (do NOT introduce):
   - A custom backend server — the app is a DHIS2 web app; DHIS2 is the API.
   - Direct `fetch` / `axios` calls from `webapp/` — always go through a repository.
-  - Business logic in React components — push it into `application/` use cases.
+  - Business logic in React components — push it into `domain/usecases/`.
+  - A top-level `src/application/` folder — use cases live in `src/domain/usecases/`.
   - Mutating domain entities in place — return new values.
   - New styling systems — keep the existing MUI v4 + styled-components stack.
   - Introducing a new state-management library — use React contexts + hooks.
@@ -121,7 +126,7 @@ context: |
 
   Extension principles:
   - New metadata types or visualizations: add entities + repository interfaces in
-    `domain/`, use cases in `application/`, DHIS2 adapters in `data/`, UI in `webapp/`.
+    `domain/`, use cases in `domain/usecases/`, DHIS2 adapters in `data/`, UI in `webapp/`.
   - New DHIS2 API calls: add the method on the relevant `domain/repositories/`
     interface first, then implement it in `data/repositories/` using `@eyeseetea/d2-api`.
   - New pages: register the route in the webapp router and wire dependencies
@@ -133,8 +138,8 @@ context: |
   - Unit tests live next to the code they cover as `*.spec.ts` / `*.spec.tsx`
     (also `__tests__/` folders where it improves clarity).
   - Vitest runs under jsdom; setup file is `src/tests/setup.js`.
-  - Domain and application layers are the primary test targets — they should be
-    testable with zero DHIS2 mocking beyond fake repositories.
+  - Domain (entities, use cases) is the primary test target — it should be testable
+    with zero DHIS2 mocking beyond fake repositories.
   - Data-layer repositories are tested with recorded fixtures or fake `d2-api`
     responses, not live DHIS2 calls.
   - Presentation tests use @testing-library/react with accessible queries.

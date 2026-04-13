@@ -4,6 +4,7 @@ import {
     selectableResourceTypes,
     ResourceType,
 } from "$/domain/metadata/ResourceType";
+import { MAX_PAGE_SIZE } from "$/domain/metadata/pagination";
 
 export type MetadataQueryState = {
     type: ResourceType;
@@ -93,14 +94,14 @@ export const MetadataQueryBuilder: React.FC<MetadataQueryBuilderProps> = ({
                         className="metadata-query__input metadata-query__input--number"
                         type="number"
                         min={1}
-                        max={200}
+                        max={MAX_PAGE_SIZE}
                         value={value.pageSize}
                         disabled={!value.paging}
                         onChange={event =>
                             onChange({
                                 ...value,
                                 pageSize: Math.min(
-                                    200,
+                                    MAX_PAGE_SIZE,
                                     Math.max(1, Number(event.target.value || 1))
                                 ),
                             })

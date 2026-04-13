@@ -5,13 +5,33 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2026-02-13T09:07:20.425Z\n"
-"PO-Revision-Date: 2026-02-13T09:07:20.425Z\n"
+"POT-Creation-Date: 2026-04-11T04:44:41.631Z\n"
+"PO-Revision-Date: 2026-04-11T04:44:41.631Z\n"
 
-msgid "Add"
+msgid "Select a row to view relationships."
 msgstr ""
 
-msgid "List"
+msgid "Loading graph..."
+msgstr ""
+
+msgid "Loading..."
+msgstr ""
+
+msgid "Load combos"
+msgstr ""
+
+msgid "Load more"
+msgstr ""
+
+msgid "All loaded"
+msgstr ""
+
+msgid ""
+"3D view unavailable in this browser. Falling back to 2D. Enable "
+"WebGL/WebGPU to use the 3D view."
+msgstr ""
+
+msgid "Loading 3D view..."
 msgstr ""
 
 msgid "Visualization"
@@ -24,6 +44,9 @@ msgid "3D Tree"
 msgstr ""
 
 msgid "3D Timeline"
+msgstr ""
+
+msgid "Category option combos"
 msgstr ""
 
 msgid "Colors"
@@ -41,11 +64,23 @@ msgstr ""
 msgid "Help"
 msgstr ""
 
-msgid "Hello {{name}}"
+msgid "Loading results..."
 msgstr ""
 
-msgid "Detail page"
+msgid "{{total}} total"
 msgstr ""
 
-msgid "Section"
+msgid "{{itemCount}} items"
+msgstr ""
+
+msgid "page {{page}} of {{pageCount}}"
+msgstr ""
+
+msgid "Fetching metadata..."
+msgstr ""
+
+msgid "Prev"
+msgstr ""
+
+msgid "Next"
 msgstr ""

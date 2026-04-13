@@ -24,6 +24,7 @@ export const resourceTypeLabels: Record<ResourceType, string> = {
 
 export const selectableResourceTypes = [
     "dataElements",
+    "dataSets",
     "categories",
     "categoryCombos",
     "categoryOptions",

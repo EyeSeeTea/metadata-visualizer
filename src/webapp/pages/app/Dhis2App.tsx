@@ -2,16 +2,19 @@ import React from "react";
 import { Provider } from "@dhis2/app-runtime";
 import { App } from "./App";
 
-export function Dhis2App(_props: {}) {
+export function Dhis2App() {
     const [baseUrlRes, setBaseUrlRes] = React.useState<BaseUrlResult>({ type: "loading" });
 
     React.useEffect(() => {
         getBaseUrl()
             .then(baseUrl => setBaseUrlRes({ type: "loaded", data: { baseUrl } }))
-            .catch(error =>
+            .catch((error: unknown) =>
                 setBaseUrlRes({
                     type: "error",
-                    error: { baseUrl: env["VITE_DHIS2_BASE_URL"], error: error as Error },
+                    error: {
+                        baseUrl: env["VITE_DHIS2_BASE_URL"],
+                        error: error instanceof Error ? error : new Error(String(error)),
+                    },
                 })
             );
     }, []);

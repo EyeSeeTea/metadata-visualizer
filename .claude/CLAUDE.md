@@ -46,35 +46,40 @@ Leave every file you touch cleaner than you found it. When working on a task, if
 ## Architecture
 
 This project follows **Clean Architecture** with strict layered dependency rules. The DHIS2
-instance is the only external system — there is no custom backend.
+instance is the only external system — there is no custom backend. Following the EyeSeeTea
+convention used across all apps in the organization, **use cases live inside the domain
+layer** (`src/domain/usecases/`) rather than in a separate `application/` folder.
 
 ```
-domain/         entities, repository interfaces (pure TS, no framework, no I/O)
-   ^
-   | depends on
-   |
-application/    use cases orchestrating domain via repository interfaces
-   ^
-   | depends on
-   |
-data/           concrete repository implementations (DHIS2 adapters via @eyeseetea/d2-api)
-   ^
-   | wired via CompositionRoot
-   |
-webapp/         React components, pages, contexts (presentation + wiring only)
+src/domain/
+├── entities/       pure value objects and domain types
+├── repositories/   interfaces only (the contract with the outside world)
+└── usecases/       use cases orchestrating entities + repositories
+     ^
+     | depends on
+     |
+src/data/           concrete repository implementations (DHIS2 adapters)
+     ^
+     | wired via CompositionRoot
+     |
+src/webapp/         React components, pages, contexts (presentation + wiring only)
 ```
 
 ### Hard Rules
 
 - **Dependency Rule**: outer layers depend on inner layers, never the reverse.
-  `domain/` has zero dependencies on React, DHIS2, `@eyeseetea/d2-api`, `fetch`, or any I/O.
-- **Repository pattern**: all DHIS2 API access goes through repository interfaces defined in
-  `src/domain/repositories/` with concrete implementations in `src/data/repositories/` that
-  use `@eyeseetea/d2-api`.
+  `src/domain/` has zero dependencies on React, `@dhis2/*`, `@eyeseetea/d2-api`, `fetch`,
+  or any I/O primitive. Use cases under `src/domain/usecases/` depend only on other
+  `domain/` code (entities, repository interfaces, other domain helpers).
+- **No `application/` folder.** Use cases belong to the domain layer under
+  `src/domain/usecases/<area>/<UseCase>.ts`. Do not recreate a top-level `application/`
+  layer — this convention is shared with all other EyeSeeTea DHIS2 apps.
+- **Repository pattern**: all DHIS2 API access goes through repository interfaces defined
+  in `src/domain/repositories/` with concrete implementations in `src/data/repositories/`.
 - **Presentation is wiring only.** React components parse props/state, call use cases via
   `CompositionRoot`, and render. No business logic, no direct API calls, no `fetch`.
-- **CompositionRoot is the single DI point.** `src/CompositionRoot.ts` wires repositories and
-  use cases. Components receive use cases via context / props, never by instantiating
+- **CompositionRoot is the single DI point.** `src/CompositionRoot.ts` wires repositories
+  and use cases. Components receive use cases via context / props, never by instantiating
   repositories themselves.
 - **No duplicated logic across components.** If two components share identical behavior,
   extract it into a shared utility or hook immediately — not in a follow-up.
@@ -190,8 +195,10 @@ Before every commit, verify the following against the changed files. Do not comm
 
 1. **Architecture** — Does the code respect the dependency rule? Is there any direct DHIS2 /
    `fetch` / `d2-api` call bypassing `domain/repositories/` → `data/repositories/`?
-2. **Layer correctness** — Is each new file in the right layer (`domain` / `application` /
-   `data` / `webapp`)? Is the `domain/` layer still free of React, DHIS2, and I/O imports?
+2. **Layer correctness** — Is each new file in the right layer (`domain/entities`,
+   `domain/repositories`, `domain/usecases`, `data`, or `webapp`)? Is the `domain/` layer
+   still free of React, DHIS2, and I/O imports? Is there any new `application/` folder
+   (there should not be)?
 3. **Patterns** — Does new code follow the same patterns as existing sibling files in the same
    layer? (Check at least one existing sibling file for reference.)
 4. **Imports** — Are all cross-module imports using the `$/` alias? No

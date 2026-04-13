@@ -420,6 +420,21 @@
     border: 1px solid #d3ddec;
 }
 
+.metadata-graph__fallback {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.metadata-graph__alert {
+    font-size: 12px;
+    color: #8a6d00;
+    background: #fff8e1;
+    border: 1px solid #f5d67a;
+    border-radius: 4px;
+    padding: 8px 12px;
+}
+
 @media (max-width: 900px) {
     .graph-layout__edges {
         display: none;

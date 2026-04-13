@@ -1,5 +1,6 @@
 import { Future } from "$/domain/entities/generic/Future";
 import { FutureData } from "$/domain/entities/generic/FutureData";
+import { splitDataSetsByOverride } from "$/domain/metadata/dataset-splits";
 import {
     GraphEdge,
     GraphGroup,
@@ -13,39 +14,51 @@ import { MetadataRepository } from "$/domain/repositories/MetadataRepository";
 
 type Named = { id: string; displayName?: string; name?: string };
 
+/**
+ * Maximum number of ids to put into a single `id:in:[...]` filter. Keeps the
+ * URL under DHIS2's practical request limit while still cutting request count
+ * by ~50x vs. one-request-per-id.
+ */
+const ID_CHUNK_SIZE = 50;
+
+const PARALLEL_OPTIONS = { concurrency: 4 };
+
+const DATA_SET_FIELDS =
+    "id,displayName,categoryCombo[id,displayName],dataSetElements[dataElement[id,displayName,categoryCombo[id,displayName]],categoryCombo[id,displayName]]";
+
 export class BuildMetadataGraphUseCase {
     constructor(private options: { metadataRepository: MetadataRepository }) {}
 
     public execute(input: { type: ResourceType; id: string }): FutureData<MetadataGraph> {
-        return Future.block(async $ => {
-            switch (input.type) {
-                case "dataElements":
-                    return await $(this.buildDataElementGraph(input.id));
-                case "categoryCombos":
-                    return await $(this.buildCategoryComboGraph(input.id));
-                case "categories":
-                    return await $(this.buildCategoryGraph(input.id));
-                case "categoryOptions":
-                    return await $(this.buildCategoryOptionGraph(input.id));
-                case "categoryOptionCombos":
-                    return await $(this.buildCategoryOptionComboGraph(input.id));
-                case "dataSets":
-                    return await $(this.buildDataSetGraph(input.id));
-                default:
-                    throw new Error(`Unsupported metadata type: ${input.type}`);
-            }
-        });
+        switch (input.type) {
+            case "dataElements":
+                return this.buildDataElementGraph(input.id);
+            case "categoryCombos":
+                return this.buildCategoryComboGraph(input.id);
+            case "categories":
+                return this.buildCategoryGraph(input.id);
+            case "categoryOptions":
+                return this.buildCategoryOptionGraph(input.id);
+            case "categoryOptionCombos":
+                return this.buildCategoryOptionComboGraph(input.id);
+            case "dataSets":
+                return this.buildDataSetGraph(input.id);
+            default:
+                return Future.error(new Error(`Unsupported metadata type: ${input.type}`));
+        }
     }
 
     private buildDataElementGraph(id: string): FutureData<MetadataGraph> {
         return Future.block(async $ => {
-            const dataElement = (await $(
-                this.options.metadataRepository.get(
-                    "dataElements",
-                    id,
-                    "id,displayName,categoryCombo[id,displayName,categories[id,displayName,categoryOptions[id,displayName]]]"
+            const dataElement = asDataElement(
+                await $(
+                    this.options.metadataRepository.get(
+                        "dataElements",
+                        id,
+                        "id,displayName,categoryCombo[id,displayName,categories[id,displayName,categoryOptions[id,displayName]]]"
+                    )
                 )
-            )) as DataElement;
+            );
 
             const dataSetsByElement = await $(this.listDataSetsByDataElementIds([dataElement]));
             const { plain: dataSetsPlain, overrides: dataSetsOverride } = splitDataSetsByOverride(
@@ -115,13 +128,15 @@ export class BuildMetadataGraphUseCase {
 
     private buildCategoryComboGraph(id: string): FutureData<MetadataGraph> {
         return Future.block(async $ => {
-            const combo = (await $(
-                this.options.metadataRepository.get(
-                    "categoryCombos",
-                    id,
-                    "id,displayName,categories[id,displayName,categoryOptions[id,displayName]]"
+            const combo = asCategoryCombo(
+                await $(
+                    this.options.metadataRepository.get(
+                        "categoryCombos",
+                        id,
+                        "id,displayName,categories[id,displayName,categoryOptions[id,displayName]]"
+                    )
                 )
-            )) as CategoryCombo;
+            );
 
             const dataElementsList = await $(
                 this.options.metadataRepository.list({
@@ -185,13 +200,15 @@ export class BuildMetadataGraphUseCase {
 
     private buildCategoryGraph(id: string): FutureData<MetadataGraph> {
         return Future.block(async $ => {
-            const category = (await $(
-                this.options.metadataRepository.get(
-                    "categories",
-                    id,
-                    "id,displayName,categoryOptions[id,displayName]"
+            const category = asCategory(
+                await $(
+                    this.options.metadataRepository.get(
+                        "categories",
+                        id,
+                        "id,displayName,categoryOptions[id,displayName]"
+                    )
                 )
-            )) as Category;
+            );
 
             const combosList = await $(
                 this.options.metadataRepository.list({
@@ -247,9 +264,11 @@ export class BuildMetadataGraphUseCase {
 
     private buildCategoryOptionGraph(id: string): FutureData<MetadataGraph> {
         return Future.block(async $ => {
-            const option = (await $(
-                this.options.metadataRepository.get("categoryOptions", id, "id,displayName")
-            )) as CategoryOption;
+            const option = asCategoryOption(
+                await $(
+                    this.options.metadataRepository.get("categoryOptions", id, "id,displayName")
+                )
+            );
 
             const categoriesList = await $(
                 this.options.metadataRepository.list({
@@ -299,9 +318,10 @@ export class BuildMetadataGraphUseCase {
                 return key;
             });
 
+            const overrideIds = new Set(dataSetsOverride.map(override => override.id));
             const dataSetKeys = uniqueById(
                 [...dataSetsPlain, ...dataSetsByCombo.items].filter(
-                    item => !dataSetsOverride.some(override => override.id === item.id)
+                    item => !overrideIds.has(item.id)
                 )
             ).map(item => {
                 const key = addNode("dataSets", item);
@@ -355,13 +375,15 @@ export class BuildMetadataGraphUseCase {
 
     private buildCategoryOptionComboGraph(id: string): FutureData<MetadataGraph> {
         return Future.block(async $ => {
-            const coc = (await $(
-                this.options.metadataRepository.get(
-                    "categoryOptionCombos",
-                    id,
-                    "id,displayName,categoryCombo[id,displayName],categoryOptions[id,displayName]"
+            const coc = asCategoryOptionCombo(
+                await $(
+                    this.options.metadataRepository.get(
+                        "categoryOptionCombos",
+                        id,
+                        "id,displayName,categoryCombo[id,displayName],categoryOptions[id,displayName]"
+                    )
                 )
-            )) as CategoryOptionCombo;
+            );
 
             const dataElementsList = coc.categoryCombo
                 ? await $(this.listDataElementsByCategoryCombos([coc.categoryCombo]))
@@ -398,9 +420,10 @@ export class BuildMetadataGraphUseCase {
                 return key;
             });
 
+            const overrideIds = new Set(dataSetsOverride.map(override => override.id));
             const dataSetKeys = uniqueById(
                 [...dataSetsPlain, ...dataSetsByCombo.items].filter(
-                    item => !dataSetsOverride.some(override => override.id === item.id)
+                    item => !overrideIds.has(item.id)
                 )
             ).map(item => {
                 const key = addNode("dataSets", item);
@@ -448,13 +471,15 @@ export class BuildMetadataGraphUseCase {
 
     private buildDataSetGraph(id: string): FutureData<MetadataGraph> {
         return Future.block(async $ => {
-            const dataSet = (await $(
-                this.options.metadataRepository.get(
-                    "dataSets",
-                    id,
-                    "id,displayName,categoryCombo[id,displayName,categories[id,displayName,categoryOptions[id,displayName]]],dataSetElements[dataElement[id,displayName,categoryCombo[id,displayName]],categoryCombo[id,displayName]]"
+            const dataSet = asDataSet(
+                await $(
+                    this.options.metadataRepository.get(
+                        "dataSets",
+                        id,
+                        "id,displayName,categoryCombo[id,displayName,categories[id,displayName,categoryOptions[id,displayName]]],dataSetElements[dataElement[id,displayName,categoryCombo[id,displayName]],categoryCombo[id,displayName]]"
+                    )
                 )
-            )) as DataSet;
+            );
 
             const { getNodes, edges, addNode, addEdge } = graphBuilder();
             const centerKey = addNode("dataSets", dataSet);
@@ -540,89 +565,78 @@ export class BuildMetadataGraphUseCase {
     }
 
     private listCategoryCombosByCategories(categories: MetadataItem[]): FutureData<MetadataList> {
-        return Future.block(async $ => {
-            const lists = await $(
-                Future.sequential(
-                    categories.map(category =>
-                        this.options.metadataRepository.list({
-                            type: "categoryCombos",
-                            fields: "id,displayName",
-                            filters: [`categories.id:eq:${category.id}`],
-                            paging: false,
-                        })
-                    )
-                )
-            );
-
-            const items = uniqueById(lists.flatMap(list => list.items));
-            return { items };
+        return this.listByInFilter({
+            type: "categoryCombos",
+            fields: "id,displayName",
+            filterField: "categories.id",
+            ids: categories.map(category => category.id),
         });
     }
 
     private listDataElementsByCategoryCombos(
         categoryCombos: MetadataItem[]
     ): FutureData<MetadataList> {
-        return Future.block(async $ => {
-            const lists = await $(
-                Future.sequential(
-                    categoryCombos.map(combo =>
-                        this.options.metadataRepository.list({
-                            type: "dataElements",
-                            fields: "id,displayName",
-                            filters: [`categoryCombo.id:eq:${combo.id}`],
-                            paging: false,
-                        })
-                    )
-                )
-            );
-
-            const items = uniqueById(lists.flatMap(list => list.items));
-            return { items };
+        return this.listByInFilter({
+            type: "dataElements",
+            fields: "id,displayName",
+            filterField: "categoryCombo.id",
+            ids: categoryCombos.map(combo => combo.id),
         });
     }
 
     private listDataSetsByCategoryComboIds(
         categoryCombos: MetadataItem[]
     ): FutureData<MetadataList> {
-        return Future.block(async $ => {
-            const lists = await $(
-                Future.sequential(
-                    categoryCombos.map(combo =>
-                        this.options.metadataRepository.list({
-                            type: "dataSets",
-                            fields: "id,displayName,categoryCombo[id,displayName],dataSetElements[dataElement[id,displayName,categoryCombo[id,displayName]],categoryCombo[id,displayName]]",
-                            filters: [`categoryCombo.id:eq:${combo.id}`],
-                            paging: false,
-                        })
-                    )
-                )
-            );
-
-            const items = uniqueById(lists.flatMap(list => list.items));
-            return { items };
+        return this.listByInFilter({
+            type: "dataSets",
+            fields: DATA_SET_FIELDS,
+            filterField: "categoryCombo.id",
+            ids: categoryCombos.map(combo => combo.id),
         });
     }
 
     private listDataSetsByDataElementIds(dataElements: MetadataItem[]): FutureData<MetadataList> {
-        return Future.block(async $ => {
-            const lists = await $(
-                Future.sequential(
-                    dataElements.map(element =>
-                        this.options.metadataRepository.list({
-                            type: "dataSets",
-                            fields: "id,displayName,categoryCombo[id,displayName],dataSetElements[dataElement[id,displayName,categoryCombo[id,displayName]],categoryCombo[id,displayName]]",
-                            filters: [`dataSetElements.dataElement.id:eq:${element.id}`],
-                            paging: false,
-                        })
-                    )
-                )
-            );
-
-            const items = uniqueById(lists.flatMap(list => list.items));
-            return { items };
+        return this.listByInFilter({
+            type: "dataSets",
+            fields: DATA_SET_FIELDS,
+            filterField: "dataSetElements.dataElement.id",
+            ids: dataElements.map(element => element.id),
         });
     }
+
+    /**
+     * Fan-out helper: for a list of ids, issues one `<field>:in:[id1,id2,...]`
+     * request per chunk (parallelised) and returns the deduplicated union of
+     * results. Chunking keeps the request URL under DHIS2's practical limit.
+     */
+    private listByInFilter(options: {
+        type: ResourceType;
+        fields: string;
+        filterField: string;
+        ids: ReadonlyArray<string>;
+    }): FutureData<MetadataList> {
+        const uniqueIds = Array.from(new Set(options.ids));
+        if (uniqueIds.length === 0) {
+            return Future.success({ items: [] });
+        }
+
+        const chunks = chunk(uniqueIds, ID_CHUNK_SIZE);
+        const requests = chunks.map(chunkIds =>
+            this.options.metadataRepository.list({
+                type: options.type,
+                fields: options.fields,
+                filters: [`${options.filterField}:in:[${chunkIds.join(",")}]`],
+                paging: false,
+            })
+        );
+
+        return Future.parallel(requests, PARALLEL_OPTIONS).map(lists => ({
+            items: uniqueById(lists.flatMap(list => list.items)),
+        }));
+    }
 }
+
+// --- Parsed response shapes (structural, not runtime-validated) ----------
 
 type CategoryOption = MetadataItem & { displayName?: string; name?: string };
 type Category = MetadataItem & { categoryOptions?: CategoryOption[] };
@@ -640,6 +654,69 @@ type DataSet = MetadataItem & {
     categoryCombo?: CategoryCombo;
     dataSetElements?: DataSetElement[];
 };
+
+// Narrowing helpers. Each validates only the fields the corresponding
+// buildXGraph actually reads, so that missing nested structures are treated
+// as "empty" rather than as payload errors. When a field is present but has
+// the wrong shape we throw with a clear message rather than silently
+// producing a broken graph.
+
+function asDataElement(item: MetadataItem): DataElement {
+    assertOptionalCategoryCombo(item, "dataElement");
+    return item as DataElement;
+}
+
+function asCategoryCombo(item: MetadataItem): CategoryCombo {
+    assertOptionalCategoryArray(item, "categoryCombo");
+    return item as CategoryCombo;
+}
+
+function asCategory(item: MetadataItem): Category {
+    assertOptionalCategoryOptionArray(item, "category");
+    return item as Category;
+}
+
+function asCategoryOption(item: MetadataItem): CategoryOption {
+    return item as CategoryOption;
+}
+
+function asCategoryOptionCombo(item: MetadataItem): CategoryOptionCombo {
+    assertOptionalCategoryCombo(item, "categoryOptionCombo");
+    assertOptionalCategoryOptionArray(item, "categoryOptionCombo");
+    return item as CategoryOptionCombo;
+}
+
+function asDataSet(item: MetadataItem): DataSet {
+    assertOptionalCategoryCombo(item, "dataSet");
+    const elements = (item as { dataSetElements?: unknown }).dataSetElements;
+    if (elements !== undefined && !Array.isArray(elements)) {
+        throw new Error("BuildMetadataGraphUseCase: dataSet.dataSetElements must be an array");
+    }
+    return item as DataSet;
+}
+
+function assertOptionalCategoryCombo(item: MetadataItem, owner: string): void {
+    const combo = (item as { categoryCombo?: unknown }).categoryCombo;
+    if (combo !== undefined && (typeof combo !== "object" || combo === null)) {
+        throw new Error(`BuildMetadataGraphUseCase: ${owner}.categoryCombo must be an object`);
+    }
+}
+
+function assertOptionalCategoryArray(item: MetadataItem, owner: string): void {
+    const categories = (item as { categories?: unknown }).categories;
+    if (categories !== undefined && !Array.isArray(categories)) {
+        throw new Error(`BuildMetadataGraphUseCase: ${owner}.categories must be an array`);
+    }
+}
+
+function assertOptionalCategoryOptionArray(item: MetadataItem, owner: string): void {
+    const options = (item as { categoryOptions?: unknown }).categoryOptions;
+    if (options !== undefined && !Array.isArray(options)) {
+        throw new Error(`BuildMetadataGraphUseCase: ${owner}.categoryOptions must be an array`);
+    }
+}
+
+// --- Graph builder utilities ---------------------------------------------
 
 function graphBuilder() {
     const nodesMap = new Map<string, GraphNode>();
@@ -679,8 +756,7 @@ function addCategories(
     const categoryKeys = new Set<string>();
     const optionKeys = new Set<string>();
 
-    const categories = combo?.categories ?? [];
-    categories.forEach(category => {
+    (combo?.categories ?? []).forEach(category => {
         const categoryKey = addNode("categories", category);
         categoryKeys.add(categoryKey);
         if (comboKey) {
@@ -701,32 +777,16 @@ function buildGroups(groups: GraphGroup[]) {
 }
 
 function uniqueById(items: MetadataItem[]): MetadataItem[] {
-    const map = new Map<string, MetadataItem>();
-    items.forEach(item => {
-        map.set(item.id, item);
-    });
-    return Array.from(map.values());
+    return Array.from(
+        items
+            .reduce<Map<string, MetadataItem>>((map, item) => map.set(item.id, item), new Map())
+            .values()
+    );
 }
 
-function splitDataSetsByOverride(dataSets: MetadataItem[]) {
-    const plain: DataSet[] = [];
-    const overrides: DataSet[] = [];
-
-    dataSets.forEach(item => {
-        const dataSet = item as DataSet;
-        const elements = dataSet.dataSetElements ?? [];
-        const hasOverride = elements.some(element => {
-            const overrideCombo = element.categoryCombo?.id;
-            const defaultCombo = element.dataElement?.categoryCombo?.id;
-            return Boolean(overrideCombo && defaultCombo && overrideCombo !== defaultCombo);
-        });
-
-        if (hasOverride) {
-            overrides.push(dataSet);
-        } else {
-            plain.push(dataSet);
-        }
-    });
-
-    return { plain, overrides };
+function chunk<T>(items: ReadonlyArray<T>, size: number): T[][] {
+    if (size <= 0) return [items.slice()];
+    return Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
+        items.slice(index * size, index * size + size)
+    );
 }

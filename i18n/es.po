@@ -1,18 +1,38 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2026-02-13T09:07:20.425Z\n"
+"POT-Creation-Date: 2026-04-11T04:44:41.631Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-msgid "Add"
-msgstr "Añadir"
+msgid "Select a row to view relationships."
+msgstr ""
 
-msgid "List"
-msgstr "Listar"
+msgid "Loading graph..."
+msgstr ""
+
+msgid "Loading..."
+msgstr ""
+
+msgid "Load combos"
+msgstr ""
+
+msgid "Load more"
+msgstr ""
+
+msgid "All loaded"
+msgstr ""
+
+msgid ""
+"3D view unavailable in this browser. Falling back to 2D. Enable WebGL/WebGPU "
+"to use the 3D view."
+msgstr ""
+
+msgid "Loading 3D view..."
+msgstr ""
 
 msgid "Visualization"
 msgstr "Visualización"
@@ -25,6 +45,9 @@ msgstr "Árbol 3D"
 
 msgid "3D Timeline"
 msgstr "Línea temporal 3D"
+
+msgid "Category option combos"
+msgstr ""
 
 msgid "Colors"
 msgstr "Colores"
@@ -41,11 +64,35 @@ msgstr "Volver"
 msgid "Help"
 msgstr "Ayuda"
 
-msgid "Hello {{name}}"
-msgstr "Hola {{name}}"
-
-msgid "Detail page"
+msgid "Loading results..."
 msgstr ""
 
-msgid "Section"
-msgstr "Sección"
+msgid "{{total}} total"
+msgstr ""
+
+msgid "{{itemCount}} items"
+msgstr ""
+
+msgid "page {{page}} of {{pageCount}}"
+msgstr ""
+
+msgid "Fetching metadata..."
+msgstr ""
+
+msgid "Prev"
+msgstr ""
+
+msgid "Next"
+msgstr ""
+
+#~ msgid "Add"
+#~ msgstr "Añadir"
+
+#~ msgid "List"
+#~ msgstr "Listar"
+
+#~ msgid "Hello {{name}}"
+#~ msgstr "Hola {{name}}"
+
+#~ msgid "Section"
+#~ msgstr "Sección"
