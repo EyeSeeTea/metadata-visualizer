@@ -83,7 +83,7 @@ $ yarn localize
 
 ### Scripts
 
-Check the example script, entry `"script-example"`in `package.json`->scripts and `src/scripts/example.ts`.
+Standalone scripts live in `src/scripts/` and are run via `yarn run-script <path>` (e.g. `yarn run-script src/scripts/zip-build.ts`).
 
 ### Misc Notes
 
