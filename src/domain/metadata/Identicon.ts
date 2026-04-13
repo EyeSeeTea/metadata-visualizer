@@ -86,7 +86,8 @@ export function buildIdenticonSvg(
 ): IdenticonResult {
     const shape = buildIdenticonShape(hashHex, size, grid);
     const rectStrings = shape.rects.map(
-        r => `<rect x="${r.x}" y="${r.y}" width="${r.width}" height="${r.height}" fill="${r.fill}" />`
+        r =>
+            `<rect x="${r.x}" y="${r.y}" width="${r.width}" height="${r.height}" fill="${r.fill}" />`
     );
     const svg = [
         `<svg xmlns="http://www.w3.org/2000/svg" width="${shape.size}" height="${shape.size}" viewBox="0 0 ${shape.size} ${shape.size}" shape-rendering="crispEdges">`,

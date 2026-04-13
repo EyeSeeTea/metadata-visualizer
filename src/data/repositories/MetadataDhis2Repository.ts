@@ -90,17 +90,11 @@ function buildParams(query: MetadataQuery): Dhis2QueryParameters {
     return params;
 }
 
-function toMetadataList(
-    response: unknown,
-    type: ResourceType,
-    context: string
-): MetadataList {
+function toMetadataList(response: unknown, type: ResourceType, context: string): MetadataList {
     const envelope = assertListEnvelope(response, context);
     const rawItems = envelope.items[type];
     if (rawItems === undefined) {
-        throw new Dhis2PayloadError(
-            `${context}: payload is missing "${type}" collection`
-        );
+        throw new Dhis2PayloadError(`${context}: payload is missing "${type}" collection`);
     }
     const items = assertMetadataItems(rawItems, `${context}.items.${type}`);
     return {

@@ -133,7 +133,9 @@ export const MetadataExplorerPage: React.FC = () => {
                         />
                     )}
                     {listState.type === "loading" && (
-                        <div className="metadata-table__empty">{i18n.t("Fetching metadata...")}</div>
+                        <div className="metadata-table__empty">
+                            {i18n.t("Fetching metadata...")}
+                        </div>
                     )}
 
                     <div className="metadata-pager">

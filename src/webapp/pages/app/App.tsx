@@ -68,10 +68,7 @@ function App_() {
                         <AppContext.Provider value={appContext}>
                             <HashRouter>
                                 <Switch>
-                                    <Route
-                                        path="/"
-                                        render={() => <MetadataExplorerPage />}
-                                    />
+                                    <Route path="/" render={() => <MetadataExplorerPage />} />
                                 </Switch>
                             </HashRouter>
                         </AppContext.Provider>

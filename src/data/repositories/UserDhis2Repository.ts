@@ -78,10 +78,7 @@ function parseNamedRefs(value: unknown, context: string): Array<{ id: string; na
     });
 }
 
-function parseUserCredentials(
-    value: unknown,
-    context: string
-): D2User["userCredentials"] {
+function parseUserCredentials(value: unknown, context: string): D2User["userCredentials"] {
     if (!isRecord(value)) {
         throw new Dhis2PayloadError(`${context}: expected object`);
     }

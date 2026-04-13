@@ -94,9 +94,7 @@ export const MetadataGraphPanel: React.FC<MetadataGraphPanelProps> = ({
                             setCocState(prev => ({
                                 type: "loaded",
                                 items:
-                                    pageToLoad === 1
-                                        ? data.items
-                                        : [...prev.items, ...data.items],
+                                    pageToLoad === 1 ? data.items : [...prev.items, ...data.items],
                                 pager: data.pager,
                                 page: pageToLoad,
                                 pageSize: prev.pageSize,
@@ -138,7 +136,9 @@ export const MetadataGraphPanel: React.FC<MetadataGraphPanelProps> = ({
 
     if (!selectedItem) {
         return (
-            <div className="metadata-graph__placeholder">{i18n.t("Select a row to view relationships.")}</div>
+            <div className="metadata-graph__placeholder">
+                {i18n.t("Select a row to view relationships.")}
+            </div>
         );
     }
 
@@ -159,8 +159,7 @@ export const MetadataGraphPanel: React.FC<MetadataGraphPanelProps> = ({
     // Only surface the lazy combos UI when there is something actionable: a load failure
     // (so the user can retry) or more pages available beyond the auto-loaded first page.
     // The happy path stays clutter-free — the combos are merged into the graph silently.
-    const showLazyCombos =
-        Boolean(lazyCombo) && (cocState.type === "error" || cocCanLoadMore);
+    const showLazyCombos = Boolean(lazyCombo) && (cocState.type === "error" || cocCanLoadMore);
 
     const handleOpenApi = (node: GraphNode) => {
         const link = buildApiLink(baseUrl, node.type, node.id);
@@ -189,7 +188,11 @@ export const MetadataGraphPanel: React.FC<MetadataGraphPanelProps> = ({
             )}
         >
             <React.Suspense
-                fallback={<div className="metadata-graph__placeholder">{i18n.t("Loading 3D view...")}</div>}
+                fallback={
+                    <div className="metadata-graph__placeholder">
+                        {i18n.t("Loading 3D view...")}
+                    </div>
+                }
             >
                 <MetadataGraphView3D
                     graph={mergedGraph}
