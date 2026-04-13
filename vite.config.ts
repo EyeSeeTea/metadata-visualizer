@@ -2,7 +2,6 @@
 import { ProxyOptions, UserConfig, defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import checker from "vite-plugin-checker";
-import nodePolyfills from "vite-plugin-node-stdlib-browser";
 import { execSync } from "child_process";
 import * as path from "path";
 
@@ -20,7 +19,6 @@ export default ({ mode }): UserConfig => {
             __APP_BUILD_TIME__: JSON.stringify(buildTime),
         },
         plugins: [
-            nodePolyfills(),
             react(),
             checker({
                 overlay: false,
