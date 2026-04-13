@@ -11,8 +11,12 @@ import { MetadataRepository } from "$/domain/repositories/MetadataRepository";
  * Seed with a Map keyed by ResourceType. The fake applies the minimum matching
  * that is actually exercised by use cases today:
  *  - `type` selects which collection to read from.
- *  - `filters` strings of the form `<field>:eq:<value>` are matched against the
- *    top-level field on each item.
+ *  - `filters` strings of the form `<path>:eq:<value>` or
+ *    `<path>:in:[<v1>,<v2>,...]` are matched. The path may cross nested
+ *    objects and arrays: when a segment points at an array, the remainder of
+ *    the path is applied to every element and a match on any element is
+ *    enough for the filter to succeed. This mirrors DHIS2's own behaviour for
+ *    filters like `categoryOptions.id:eq:X`.
  *  - When `paging` is enabled, `page` and `pageSize` slice the results and
  *    populate a minimal pager; otherwise all matching items are returned.
  */
@@ -52,17 +56,32 @@ export class MetadataTestRepository implements MetadataRepository {
 }
 
 function matchesFilter(item: MetadataItem, filter: string): boolean {
+    const inMatch = /^([^:]+):in:\[(.*)\]$/.exec(filter);
+    if (inMatch && inMatch[1] !== undefined && inMatch[2] !== undefined) {
+        const path = inMatch[1].split(".");
+        const expected = new Set(inMatch[2].split(",").filter(value => value.length > 0));
+        if (expected.size === 0) return false;
+        return collectValues(item, path).some(value => expected.has(String(value)));
+    }
     const eqMatch = /^([^:]+):eq:(.+)$/.exec(filter);
-    if (!eqMatch || !eqMatch[1] || eqMatch[2] === undefined) return true;
-    const [, path, expected] = eqMatch;
-    const actual = readPath(item, path.split("."));
-    return String(actual) === expected;
+    if (eqMatch && eqMatch[1] !== undefined && eqMatch[2] !== undefined) {
+        const path = eqMatch[1].split(".");
+        const expected = eqMatch[2];
+        return collectValues(item, path).some(value => String(value) === expected);
+    }
+    return true;
 }
 
-function readPath(value: unknown, path: string[]): unknown {
-    return path.reduce<unknown>((current, key) => {
-        if (current === null || current === undefined) return undefined;
-        if (typeof current !== "object") return undefined;
-        return (current as Record<string, unknown>)[key];
-    }, value);
+function collectValues(value: unknown, path: readonly string[]): unknown[] {
+    if (path.length === 0) {
+        return value === undefined ? [] : [value];
+    }
+    if (value === null || value === undefined) return [];
+    if (Array.isArray(value)) {
+        return value.flatMap(element => collectValues(element, path));
+    }
+    if (typeof value !== "object") return [];
+    const [head, ...tail] = path;
+    if (head === undefined) return [];
+    return collectValues((value as Record<string, unknown>)[head], tail);
 }

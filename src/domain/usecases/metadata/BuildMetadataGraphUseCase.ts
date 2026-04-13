@@ -312,6 +312,12 @@ export class BuildMetadataGraphUseCase {
                 return key;
             });
 
+            const categoryComboKeys = categoryCombosList.items.map(combo => {
+                const key = addNode("categoryCombos", combo);
+                addEdge(key, centerKey, "categoryCombos");
+                return key;
+            });
+
             const dataElementKeys = dataElementsList.items.map(item => {
                 const key = addNode("dataElements", item);
                 addEdge(key, centerKey, "dataElements");
@@ -346,6 +352,12 @@ export class BuildMetadataGraphUseCase {
                     id: "categories",
                     title: "Categories",
                     nodeKeys: categoryKeys,
+                    direction: "parent",
+                },
+                {
+                    id: "category-combos",
+                    title: "Category combos",
+                    nodeKeys: categoryComboKeys,
                     direction: "parent",
                 },
                 {
