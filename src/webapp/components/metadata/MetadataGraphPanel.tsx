@@ -155,19 +155,12 @@ export const MetadataGraphPanel: React.FC<MetadataGraphPanelProps> = ({
     }
 
     const cocPager = cocState.pager;
-    const cocTotal = cocPager?.total;
-    const cocCanLoadMore = cocPager
-        ? cocState.page < cocPager.pageCount
-        : cocState.type !== "loaded";
-
-    const lazyButtonLabel =
-        cocState.type === "loading"
-            ? i18n.t("Loading...")
-            : cocState.type === "idle"
-            ? i18n.t("Load combos")
-            : cocCanLoadMore
-            ? i18n.t("Load more")
-            : i18n.t("All loaded");
+    const cocCanLoadMore = cocPager ? cocState.page < cocPager.pageCount : false;
+    // Only surface the lazy combos UI when there is something actionable: a load failure
+    // (so the user can retry) or more pages available beyond the auto-loaded first page.
+    // The happy path stays clutter-free — the combos are merged into the graph silently.
+    const showLazyCombos =
+        Boolean(lazyCombo) && (cocState.type === "error" || cocCanLoadMore);
 
     const handleOpenApi = (node: GraphNode) => {
         const link = buildApiLink(baseUrl, node.type, node.id);
@@ -232,22 +225,25 @@ export const MetadataGraphPanel: React.FC<MetadataGraphPanelProps> = ({
                 ? render3D("timeline")
                 : render2D()}
 
-            {lazyCombo && (
+            {showLazyCombos && (
                 <div className="metadata-graph__lazy">
-                    <div className="metadata-graph__lazy-header">
-                        {i18n.t("Category option combos")}{" "}
-                        {cocTotal !== undefined ? `(${cocTotal})` : ""}
-                    </div>
                     {cocState.type === "error" && (
-                        <div className="metadata-graph__lazy-error">{cocState.error?.message}</div>
+                        <div className="metadata-graph__lazy-error" role="alert">
+                            {i18n.t("Failed to load category option combos:")}{" "}
+                            {cocState.error.message}
+                        </div>
                     )}
                     <button
                         type="button"
                         className="metadata-graph__lazy-button"
                         onClick={handleLoadMore}
-                        disabled={cocState.type === "loading" || !cocCanLoadMore}
+                        disabled={cocState.type === "loading"}
                     >
-                        {lazyButtonLabel}
+                        {cocState.type === "loading"
+                            ? i18n.t("Loading...")
+                            : cocState.type === "error"
+                            ? i18n.t("Retry")
+                            : i18n.t("Load more category option combos")}
                     </button>
                 </div>
             )}

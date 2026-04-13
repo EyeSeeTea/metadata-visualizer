@@ -5,25 +5,13 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2026-04-11T04:44:41.631Z\n"
-"PO-Revision-Date: 2026-04-11T04:44:41.631Z\n"
+"POT-Creation-Date: 2026-04-13T07:00:14.840Z\n"
+"PO-Revision-Date: 2026-04-13T07:00:14.840Z\n"
 
 msgid "Select a row to view relationships."
 msgstr ""
 
 msgid "Loading graph..."
-msgstr ""
-
-msgid "Loading..."
-msgstr ""
-
-msgid "Load combos"
-msgstr ""
-
-msgid "Load more"
-msgstr ""
-
-msgid "All loaded"
 msgstr ""
 
 msgid ""
@@ -46,7 +34,13 @@ msgstr ""
 msgid "3D Timeline"
 msgstr ""
 
-msgid "Category option combos"
+msgid "Loading..."
+msgstr ""
+
+msgid "Retry"
+msgstr ""
+
+msgid "Load more category option combos"
 msgstr ""
 
 msgid "Colors"

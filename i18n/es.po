@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2026-04-11T04:44:41.631Z\n"
+"POT-Creation-Date: 2026-04-13T07:00:14.840Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -12,18 +12,6 @@ msgid "Select a row to view relationships."
 msgstr ""
 
 msgid "Loading graph..."
-msgstr ""
-
-msgid "Loading..."
-msgstr ""
-
-msgid "Load combos"
-msgstr ""
-
-msgid "Load more"
-msgstr ""
-
-msgid "All loaded"
 msgstr ""
 
 msgid ""
@@ -46,7 +34,13 @@ msgstr "Árbol 3D"
 msgid "3D Timeline"
 msgstr "Línea temporal 3D"
 
-msgid "Category option combos"
+msgid "Loading..."
+msgstr ""
+
+msgid "Retry"
+msgstr ""
+
+msgid "Load more category option combos"
 msgstr ""
 
 msgid "Colors"
