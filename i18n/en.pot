@@ -5,14 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2026-02-13T11:28:44.684Z\n"
-"PO-Revision-Date: 2026-02-13T11:28:44.684Z\n"
-
-msgid "Add"
-msgstr ""
-
-msgid "List"
-msgstr ""
+"POT-Creation-Date: 2026-04-14T15:22:40.054Z\n"
+"PO-Revision-Date: 2026-04-14T15:22:40.054Z\n"
 
 msgid "Select a row to view relationships."
 msgstr ""
@@ -20,16 +14,12 @@ msgstr ""
 msgid "Loading graph..."
 msgstr ""
 
-msgid "Loading..."
+msgid ""
+"3D view unavailable in this browser. Falling back to 2D. Enable "
+"WebGL/WebGPU to use the 3D view."
 msgstr ""
 
-msgid "Load combos"
-msgstr ""
-
-msgid "Load more"
-msgstr ""
-
-msgid "All loaded"
+msgid "Loading 3D view..."
 msgstr ""
 
 msgid "Visualization"
@@ -42,6 +32,15 @@ msgid "3D Tree"
 msgstr ""
 
 msgid "3D Timeline"
+msgstr ""
+
+msgid "Loading..."
+msgstr ""
+
+msgid "Retry"
+msgstr ""
+
+msgid "Load more category option combos"
 msgstr ""
 
 msgid "Open API"
@@ -101,15 +100,6 @@ msgstr ""
 msgid "Base URL not found in manifest.webapp (see DHIS2-19708)"
 msgstr ""
 
-msgid "Hello {{name}}"
-msgstr ""
-
-msgid "Detail page"
-msgstr ""
-
-msgid "Section"
-msgstr ""
-
 msgid "Unknown JSON parsing error"
 msgstr ""
 
@@ -140,6 +130,15 @@ msgstr ""
 msgid "No results for this type/filter"
 msgstr ""
 
+msgid "Relationships"
+msgstr ""
+
+msgid "Direct only"
+msgstr ""
+
+msgid "Expanded"
+msgstr ""
+
 msgid "Select a row to view dependencies"
 msgstr ""
 
@@ -159,6 +158,9 @@ msgid "Loading results..."
 msgstr ""
 
 msgid "{{total}} total"
+msgstr ""
+
+msgid "{{itemCount}} items"
 msgstr ""
 
 msgid "page {{page}} of {{pageCount}}"

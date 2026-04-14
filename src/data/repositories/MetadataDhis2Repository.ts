@@ -1,5 +1,13 @@
 import type { DataEngine } from "$/types/dhis2-app-runtime";
 import { promiseToFuture } from "$/data/api-futures";
+import {
+    Dhis2PayloadError,
+    assertGetEnvelope,
+    assertListEnvelope,
+    assertMetadataItem,
+    assertMetadataItems,
+    parsePager,
+} from "$/data/dhis2-payload-guards";
 import { FutureData } from "$/domain/entities/generic/FutureData";
 import { MetadataItem, MetadataList } from "$/domain/metadata/MetadataItem";
 import { MetadataQuery } from "$/domain/metadata/MetadataQuery";
@@ -10,6 +18,7 @@ export class MetadataDhis2Repository implements MetadataRepository {
     constructor(private dataEngine: DataEngine) {}
 
     public list(query: MetadataQuery): FutureData<MetadataList> {
+        const context = `MetadataDhis2Repository.list(${query.type})`;
         return promiseToFuture<MetadataList>(signal =>
             this.dataEngine
                 .query(
@@ -21,13 +30,12 @@ export class MetadataDhis2Repository implements MetadataRepository {
                     },
                     { signal }
                 )
-                .then(res =>
-                    toMetadataList((res as { items: Dhis2ListResponse }).items, query.type)
-                )
+                .then(res => toMetadataList(res, query.type, context))
         );
     }
 
     public get(type: ResourceType, id: string, fields: string): FutureData<MetadataItem> {
+        const context = `MetadataDhis2Repository.get(${type}, ${id})`;
         return promiseToFuture<MetadataItem>(signal =>
             this.dataEngine
                 .query(
@@ -40,15 +48,23 @@ export class MetadataDhis2Repository implements MetadataRepository {
                     },
                     { signal }
                 )
-                .then(res => ({ ...(res as { item: MetadataItem }).item, type }))
+                .then(res => {
+                    const envelope = assertGetEnvelope(res, context);
+                    const item = assertMetadataItem(envelope.item, `${context}.item`);
+                    return { ...item, type };
+                })
         );
     }
 }
 
-type Dhis2ListResponse = {
-    pager?: MetadataList["pager"];
-    [key: string]: unknown;
-};
+type Dhis2QueryParameterPrimitive = string | number | boolean;
+type Dhis2QueryParameterAlias = { [name: string]: Dhis2QueryParameterPrimitive };
+type Dhis2QueryParameterValue =
+    | Dhis2QueryParameterPrimitive
+    | Dhis2QueryParameterAlias
+    | Array<Dhis2QueryParameterPrimitive | Dhis2QueryParameterAlias>
+    | undefined;
+type Dhis2QueryParameters = Record<string, Dhis2QueryParameterValue>;
 
 function buildParams(query: MetadataQuery): Dhis2QueryParameters {
     const params: Dhis2QueryParameters = {
@@ -74,22 +90,15 @@ function buildParams(query: MetadataQuery): Dhis2QueryParameters {
     return params;
 }
 
-type Dhis2QueryParameterPrimitive = string | number | boolean;
-type Dhis2QueryParameterAlias = { [name: string]: Dhis2QueryParameterPrimitive };
-type Dhis2QueryParameterValue =
-    | Dhis2QueryParameterPrimitive
-    | Dhis2QueryParameterAlias
-    | Array<Dhis2QueryParameterPrimitive | Dhis2QueryParameterAlias>
-    | undefined;
-type Dhis2QueryParameters = {
-    pageSize?: number;
-    [key: string]: Dhis2QueryParameterValue;
-};
-
-function toMetadataList(payload: Dhis2ListResponse, type: ResourceType): MetadataList {
-    const items = Array.isArray(payload[type]) ? (payload[type] as MetadataItem[]) : [];
+function toMetadataList(response: unknown, type: ResourceType, context: string): MetadataList {
+    const envelope = assertListEnvelope(response, context);
+    const rawItems = envelope.items[type];
+    if (rawItems === undefined) {
+        throw new Dhis2PayloadError(`${context}: payload is missing "${type}" collection`);
+    }
+    const items = assertMetadataItems(rawItems, `${context}.items.${type}`);
     return {
         items: items.map(item => ({ ...item, type })),
-        pager: payload.pager,
+        pager: parsePager(envelope.items.pager),
     };
 }

@@ -1,0 +1,66 @@
+{
+    "$schema": "https://opencode.ai/config.json",
+    "agent": {
+        "dhis2-integration-developer": {
+            "description": "DHIS2 integration developer owning the domain, application, and data layers (entities, use cases, @eyeseetea/d2-api adapters)",
+            "mode": "subagent",
+            "prompt": "{file:.agents/agents/dhis2-integration-developer.md}",
+            "tools": {
+                "Read": true,
+                "Write": true,
+                "Edit": true,
+                "Bash": true,
+                "Glob": true,
+                "Grep": true
+            }
+        },
+        "frontend-developer": {
+            "description": "Frontend developer specializing in the React/TypeScript webapp layer (components, pages, hooks, styling) for the Metadata Visualizer DHIS2 app",
+            "mode": "subagent",
+            "prompt": "{file:.agents/agents/frontend-developer.md}",
+            "tools": {
+                "Read": true,
+                "Write": true,
+                "Edit": true,
+                "Bash": true,
+                "Glob": true,
+                "Grep": true
+            }
+        },
+        "graphical-designer": {
+            "description": "Graphical designer producing wireframes and mockups in Pencil and aligning them with the @dhis2/ui + MUI v4 design system",
+            "mode": "subagent",
+            "prompt": "{file:.agents/agents/graphical-designer.md}",
+            "tools": {
+                "Read": true,
+                "Write": true,
+                "Edit": true,
+                "Bash": true,
+                "Glob": true,
+                "Grep": true
+            }
+        },
+        "code-reviewer": {
+            "description": "Code reviewer that audits PRs against Clean Architecture, functional style, immutability, and the project conventions in .claude/CLAUDE.md",
+            "mode": "subagent",
+            "prompt": "{file:.agents/agents/code-reviewer.md}",
+            "tools": {
+                "Read": true,
+                "Glob": true,
+                "Grep": true,
+                "Bash": true
+            }
+        },
+        "project-manager": {
+            "description": "Project manager translating OpenSpec change artifacts into trackable tasks and coordinating work between specialist agents",
+            "mode": "subagent",
+            "prompt": "{file:.agents/agents/project-manager.md}",
+            "tools": {
+                "Read": true,
+                "Glob": true,
+                "Grep": true,
+                "Bash": true
+            }
+        }
+    }
+}

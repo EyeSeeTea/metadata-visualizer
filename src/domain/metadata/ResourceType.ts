@@ -48,6 +48,7 @@ function capitalizeWord(word: string): string {
 
 export const selectableResourceTypes = [
     "dataElements",
+    "dataSets",
     "categories",
     "categoryCombos",
     "categoryOptions",

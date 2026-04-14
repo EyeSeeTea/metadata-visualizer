@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import { HashRouter, Route, Switch } from "react-router-dom";
 import { useDataEngine } from "@dhis2/app-runtime";
 import { HeaderBar } from "@dhis2/ui";
 import { SnackbarProvider } from "@eyeseetea/d2-ui-components";
@@ -19,7 +20,7 @@ import "./App.css";
 import muiThemeLegacy from "./themes/dhis2-legacy.theme";
 import { muiTheme } from "./themes/dhis2.theme";
 
-function App_(_props: {}) {
+function App_() {
     const dataEngine = useDataEngine();
     const [showShareButton, setShowShareButton] = useState(false);
     const [appState, setAppState] = useState<AppState>({ type: "loading" });
@@ -66,10 +67,18 @@ function App_(_props: {}) {
 
                     <div id="app" className="content">
                         <AppContext.Provider value={appContext}>
-                            <MetadataExplorerPage />
+                            <HashRouter>
+                                <Switch>
+                                    <Route path="/" render={() => <MetadataExplorerPage />} />
+                                </Switch>
+                            </HashRouter>
                         </AppContext.Provider>
 
-                        <BuildStamp data-build-commit={buildInfo.commit} data-build-time={buildInfo.builtAt}>
+                        <BuildStamp
+                            aria-hidden="true"
+                            data-build-commit={buildInfo.commit}
+                            data-build-time={buildInfo.builtAt}
+                        >
                             {`build:${buildInfo.commit}`}
                         </BuildStamp>
                     </div>

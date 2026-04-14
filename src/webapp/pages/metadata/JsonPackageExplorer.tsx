@@ -3,7 +3,7 @@ import { GraphNode } from "$/domain/metadata/MetadataGraph";
 import { getMetadataTypeLabel } from "$/domain/metadata/ResourceType";
 import { IdenticonAvatar } from "$/webapp/components/metadata/IdenticonAvatar";
 import { MetadataGraphView } from "$/webapp/components/metadata/MetadataGraphView";
-import { MetadataGraphView3D } from "$/webapp/components/metadata/MetadataGraphView3D";
+import MetadataGraphView3D from "$/webapp/components/metadata/MetadataGraphView3D";
 import i18n from "$/utils/i18n";
 import {
     buildJsonPackageDependencyGraph,

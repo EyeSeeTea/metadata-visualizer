@@ -49,10 +49,21 @@ export const MetadataGraphView: React.FC<MetadataGraphViewProps> = ({
         return graph.groups;
     }, [graph.groups]);
 
+    // Cache per-key ref callbacks so each <GraphNodeCard> receives a stable callback
+    // across renders. Without this, React would remount the ref callback every render
+    // and clear/set `nodeRefs.current[key]` twice per render pass.
+    const registerNodeCallbacks = React.useRef(
+        new Map<string, (el: HTMLDivElement | null) => void>()
+    );
     const registerNode = React.useCallback((key: string) => {
-        return (element: HTMLDivElement | null) => {
+        const cache = registerNodeCallbacks.current;
+        const existing = cache.get(key);
+        if (existing) return existing;
+        const callback = (element: HTMLDivElement | null) => {
             nodeRefs.current[key] = element;
         };
+        cache.set(key, callback);
+        return callback;
     }, []);
 
     React.useLayoutEffect(() => {
