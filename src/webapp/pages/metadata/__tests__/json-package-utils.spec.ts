@@ -1,7 +1,5 @@
-import {
-    buildJsonPackageDependencyGraph,
-    indexJsonPackage,
-} from "$/webapp/pages/metadata/json-package-utils";
+import { indexJsonPackage } from "$/domain/metadata/JsonPackageIndex";
+import { buildJsonPackageDependencyGraph } from "$/domain/usecases/metadata/BuildJsonPackageDependencyGraphUseCase";
 
 describe("json-package-utils", () => {
     it("indexes metadata arrays by type and builds dependency graph transitively", () => {
@@ -301,7 +299,7 @@ describe("json-package-utils", () => {
         expect(graph.groups.some(item => item.id === "json-type:categoryOptionGroups")).toBe(false);
 
         const groupSetBand = graph.groups.find(item => item.id === "json-type:categoryOptionGroupSets");
-        expect(groupSetBand?.title).toBe("categoryOptionGroupSets");
+        expect(groupSetBand?.title).toBe("Category option group sets");
     });
 
     it("keeps dataSets graph focused while still resolving multiple category paths", () => {
