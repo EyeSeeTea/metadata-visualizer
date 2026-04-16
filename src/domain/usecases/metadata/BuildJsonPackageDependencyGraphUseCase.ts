@@ -26,114 +26,116 @@ type TraversalIncomingRef = {
     fromEntry: JsonPackageEntry;
 };
 
-export function buildJsonPackageDependencyGraph(
-    index: JsonPackageIndex,
-    centerKey: string,
-    options: number | BuildJsonPackageGraphOptions = Number.POSITIVE_INFINITY
-): MetadataGraph {
-    const centerEntry = index.entriesByKey.get(centerKey);
-    if (!centerEntry) {
-        throw new Error(`Metadata item not found: ${centerKey}`);
-    }
-    const centerType = centerEntry.type;
-    const maxNodes =
-        typeof options === "number" ? options : options.maxNodes ?? Number.POSITIVE_INFINITY;
-    const mode: JsonPackageGraphMode =
-        typeof options === "number" ? "expanded" : options.mode ?? "expanded";
-
-    const visitedKeys = new Set<string>([centerKey]);
-    const graphEdges = new Map<string, { from: string; to: string; label: string }>();
-
-    const addNodeToGraph = (nextKey: string): boolean => {
-        if (visitedKeys.size >= maxNodes) return false;
-        if (visitedKeys.has(nextKey)) return false;
-        visitedKeys.add(nextKey);
-        return true;
-    };
-
-    const addRefsForNode = (fromKey: string, onNewNode?: (key: string) => void) => {
-        const refs = sortOutgoingRefsForTraversal(
-            index.refsByKey.get(fromKey) ?? [],
-            index,
-            centerType,
-            centerKey
-        );
-        refs.forEach(({ ref }) => {
-            const edgeKey = `${fromKey}|${ref.toKey}|${ref.via}`;
-            if (!graphEdges.has(edgeKey)) {
-                graphEdges.set(edgeKey, { from: fromKey, to: ref.toKey, label: ref.via });
-            }
-            if (addNodeToGraph(ref.toKey)) {
-                onNewNode?.(ref.toKey);
-            }
-        });
-
-        const currentType = index.entriesByKey.get(fromKey)?.type;
-        if (currentType && shouldSkipIncomingForCurrentType(centerType, currentType)) {
-            return;
+export class BuildJsonPackageDependencyGraphUseCase {
+    execute(
+        index: JsonPackageIndex,
+        centerKey: string,
+        options: number | BuildJsonPackageGraphOptions = Number.POSITIVE_INFINITY
+    ): MetadataGraph {
+        const centerEntry = index.entriesByKey.get(centerKey);
+        if (!centerEntry) {
+            throw new Error(`Metadata item not found: ${centerKey}`);
         }
+        const centerType = centerEntry.type;
+        const maxNodes =
+            typeof options === "number" ? options : options.maxNodes ?? Number.POSITIVE_INFINITY;
+        const mode: JsonPackageGraphMode =
+            typeof options === "number" ? "expanded" : options.mode ?? "expanded";
 
-        sortIncomingRefsForTraversal(
-            index.incomingRefsByKey.get(fromKey) ?? [],
-            index,
-            centerType,
-            centerKey
-        ).forEach(({ ref }) => {
-            const edgeKey = `${ref.fromKey}|${fromKey}|${ref.via}`;
-            if (!graphEdges.has(edgeKey)) {
-                graphEdges.set(edgeKey, { from: ref.fromKey, to: fromKey, label: ref.via });
-            }
-            if (addNodeToGraph(ref.fromKey)) {
-                onNewNode?.(ref.fromKey);
-            }
-        });
-    };
+        const visitedKeys = new Set<string>([centerKey]);
+        const graphEdges = new Map<string, { from: string; to: string; label: string }>();
 
-    if (mode === "direct") {
-        addRefsForNode(centerKey);
-    } else {
-        const queue = [centerKey];
+        const addNodeToGraph = (nextKey: string): boolean => {
+            if (visitedKeys.size >= maxNodes) return false;
+            if (visitedKeys.has(nextKey)) return false;
+            visitedKeys.add(nextKey);
+            return true;
+        };
 
-        while (queue.length > 0) {
-            const fromKey = queue.shift();
-            if (!fromKey) continue;
-            addRefsForNode(fromKey, key => {
-                if (key === centerKey) return;
-                queue.push(key);
+        const addRefsForNode = (fromKey: string, onNewNode?: (key: string) => void) => {
+            const refs = sortOutgoingRefsForTraversal(
+                index.refsByKey.get(fromKey) ?? [],
+                index,
+                centerType,
+                centerKey
+            );
+            refs.forEach(({ ref }) => {
+                const edgeKey = `${fromKey}|${ref.toKey}|${ref.via}`;
+                if (!graphEdges.has(edgeKey)) {
+                    graphEdges.set(edgeKey, { from: fromKey, to: ref.toKey, label: ref.via });
+                }
+                if (addNodeToGraph(ref.toKey)) {
+                    onNewNode?.(ref.toKey);
+                }
             });
+
+            const currentType = index.entriesByKey.get(fromKey)?.type;
+            if (currentType && shouldSkipIncomingForCurrentType(centerType, currentType)) {
+                return;
+            }
+
+            sortIncomingRefsForTraversal(
+                index.incomingRefsByKey.get(fromKey) ?? [],
+                index,
+                centerType,
+                centerKey
+            ).forEach(({ ref }) => {
+                const edgeKey = `${ref.fromKey}|${fromKey}|${ref.via}`;
+                if (!graphEdges.has(edgeKey)) {
+                    graphEdges.set(edgeKey, { from: ref.fromKey, to: fromKey, label: ref.via });
+                }
+                if (addNodeToGraph(ref.fromKey)) {
+                    onNewNode?.(ref.fromKey);
+                }
+            });
+        };
+
+        if (mode === "direct") {
+            addRefsForNode(centerKey);
+        } else {
+            const queue = [centerKey];
+
+            while (queue.length > 0) {
+                const fromKey = queue.shift();
+                if (!fromKey) continue;
+                addRefsForNode(fromKey, key => {
+                    if (key === centerKey) return;
+                    queue.push(key);
+                });
+            }
         }
+
+        const nodes = Array.from(visitedKeys)
+            .map(key => index.entriesByKey.get(key))
+            .filter((entry): entry is JsonPackageEntry => Boolean(entry))
+            .map(entry => ({
+                key: entry.key,
+                id: entry.id,
+                type: entry.type,
+                displayName: entry.displayName,
+            }));
+
+        const keyToNodeKey = new Map<string, string>();
+        Array.from(visitedKeys).forEach(key => {
+            const entry = index.entriesByKey.get(key);
+            if (!entry) return;
+            keyToNodeKey.set(key, entry.key);
+        });
+
+        const edges = Array.from(graphEdges.values())
+            .map(edge => {
+                const from = keyToNodeKey.get(edge.from);
+                const to = keyToNodeKey.get(edge.to);
+                if (!from || !to) return null;
+                return { from, to, label: edge.label };
+            })
+            .filter((edge): edge is NonNullable<typeof edge> => Boolean(edge));
+
+        const centerNodeKey = keyToNodeKey.get(centerKey) ?? centerEntry.key;
+        const groups = buildTypeGroups(index, visitedKeys, centerKey, keyToNodeKey);
+
+        return { center: centerNodeKey, nodes, edges, groups };
     }
-
-    const nodes = Array.from(visitedKeys)
-        .map(key => index.entriesByKey.get(key))
-        .filter((entry): entry is JsonPackageEntry => Boolean(entry))
-        .map(entry => ({
-            key: entry.key,
-            id: entry.id,
-            type: entry.type,
-            displayName: entry.displayName,
-        }));
-
-    const keyToNodeKey = new Map<string, string>();
-    Array.from(visitedKeys).forEach(key => {
-        const entry = index.entriesByKey.get(key);
-        if (!entry) return;
-        keyToNodeKey.set(key, entry.key);
-    });
-
-    const edges = Array.from(graphEdges.values())
-        .map(edge => {
-            const from = keyToNodeKey.get(edge.from);
-            const to = keyToNodeKey.get(edge.to);
-            if (!from || !to) return null;
-            return { from, to, label: edge.label };
-        })
-        .filter((edge): edge is NonNullable<typeof edge> => Boolean(edge));
-
-    const centerNodeKey = keyToNodeKey.get(centerKey) ?? centerEntry.key;
-    const groups = buildTypeGroups(index, visitedKeys, centerKey, keyToNodeKey);
-
-    return { center: centerNodeKey, nodes, edges, groups };
 }
 
 function sortOutgoingRefsForTraversal(

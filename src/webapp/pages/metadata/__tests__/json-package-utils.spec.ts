@@ -1,5 +1,7 @@
 import { indexJsonPackage } from "$/domain/metadata/JsonPackageIndex";
-import { buildJsonPackageDependencyGraph } from "$/domain/usecases/metadata/BuildJsonPackageDependencyGraphUseCase";
+import { BuildJsonPackageDependencyGraphUseCase } from "$/domain/usecases/metadata/BuildJsonPackageDependencyGraphUseCase";
+
+const buildJsonPackageDependencyGraph = new BuildJsonPackageDependencyGraphUseCase();
 
 describe("json-package-utils", () => {
     it("indexes metadata arrays by type and builds dependency graph transitively", () => {
@@ -28,7 +30,7 @@ describe("json-package-utils", () => {
         expect(index.entriesByType.dataElements).toHaveLength(1);
 
         const dataElement = requireFirst(index.entriesByType.dataElements, "dataElements");
-        const graph = buildJsonPackageDependencyGraph(index, dataElement.key);
+        const graph = buildJsonPackageDependencyGraph.execute(index, dataElement.key);
 
         const nodeTypes = graph.nodes.map(node => node.type).sort();
         expect(nodeTypes).toEqual(["categories", "categoryCombos", "dataElements"]);
@@ -64,7 +66,7 @@ describe("json-package-utils", () => {
 
         const index = indexJsonPackage(metadataPackage);
         const category = requireFirst(index.entriesByType.categories, "categories");
-        const graph = buildJsonPackageDependencyGraph(index, category.key);
+        const graph = buildJsonPackageDependencyGraph.execute(index, category.key);
 
         const linkedTypes = graph.nodes
             .filter(node => node.key !== category.key)
@@ -88,7 +90,7 @@ describe("json-package-utils", () => {
 
         const index = indexJsonPackage(metadataPackage);
         const dataSet = requireFirst(index.entriesByType.dataSets, "dataSets");
-        const graph = buildJsonPackageDependencyGraph(index, dataSet.key);
+        const graph = buildJsonPackageDependencyGraph.execute(index, dataSet.key);
 
         const linkedTypes = graph.nodes
             .filter(node => node.key !== dataSet.key)
@@ -118,7 +120,7 @@ describe("json-package-utils", () => {
 
         const index = indexJsonPackage(metadataPackage);
         const category = requireFirst(index.entriesByType.categories, "categories");
-        const graph = buildJsonPackageDependencyGraph(index, category.key);
+        const graph = buildJsonPackageDependencyGraph.execute(index, category.key);
 
         const linkedTypes = graph.nodes
             .filter(node => node.key !== category.key)
@@ -147,7 +149,7 @@ describe("json-package-utils", () => {
         const userGroup = requireFirst(index.entriesByType.userGroups, "userGroups");
 
         [user.key, userRole.key, userGroup.key].forEach(centerKey => {
-            const graph = buildJsonPackageDependencyGraph(index, centerKey);
+            const graph = buildJsonPackageDependencyGraph.execute(index, centerKey);
             const types = new Set(graph.nodes.map(node => node.type));
 
             expect(types.has("users")).toBe(true);
@@ -177,7 +179,7 @@ describe("json-package-utils", () => {
 
         const index = indexJsonPackage(metadataPackage);
         const userRole = requireFirst(index.entriesByType.userRoles, "userRoles");
-        const graph = buildJsonPackageDependencyGraph(index, userRole.key);
+        const graph = buildJsonPackageDependencyGraph.execute(index, userRole.key);
 
         const types = new Set(graph.nodes.map(node => node.type));
         expect(types.has("users")).toBe(true);
@@ -207,7 +209,7 @@ describe("json-package-utils", () => {
 
         const index = indexJsonPackage(metadataPackage);
         const indicator = requireFirst(index.entriesByType.indicators, "indicators");
-        const graph = buildJsonPackageDependencyGraph(index, indicator.key);
+        const graph = buildJsonPackageDependencyGraph.execute(index, indicator.key);
 
         const indicatorNodes = graph.nodes.filter(node => node.type === "indicators");
         expect(indicatorNodes).toHaveLength(1);
@@ -244,7 +246,7 @@ describe("json-package-utils", () => {
 
         const index = indexJsonPackage(metadataPackage);
         const dataSet = requireFirst(index.entriesByType.dataSets, "dataSets");
-        const graph = buildJsonPackageDependencyGraph(index, dataSet.key);
+        const graph = buildJsonPackageDependencyGraph.execute(index, dataSet.key);
 
         const dataSetNodes = graph.nodes.filter(node => node.type === "dataSets");
         expect(dataSetNodes).toHaveLength(1);
@@ -291,7 +293,7 @@ describe("json-package-utils", () => {
 
         const index = indexJsonPackage(metadataPackage);
         const group = requireFirst(index.entriesByType.categoryOptionGroups, "categoryOptionGroups");
-        const graph = buildJsonPackageDependencyGraph(index, group.key);
+        const graph = buildJsonPackageDependencyGraph.execute(index, group.key);
 
         const selectedTypeNodes = graph.nodes.filter(node => node.type === "categoryOptionGroups");
         expect(selectedTypeNodes).toHaveLength(1);
@@ -336,7 +338,7 @@ describe("json-package-utils", () => {
 
         const index = indexJsonPackage(metadataPackage);
         const dataSet = requireFirst(index.entriesByType.dataSets, "dataSets");
-        const graph = buildJsonPackageDependencyGraph(index, dataSet.key);
+        const graph = buildJsonPackageDependencyGraph.execute(index, dataSet.key);
 
         const dataElementIds = graph.nodes
             .filter(node => node.type === "dataElements")
@@ -385,7 +387,7 @@ describe("json-package-utils", () => {
 
         const index = indexJsonPackage(metadataPackage);
         const dataElement = requireFirst(index.entriesByType.dataElements, "dataElements");
-        const graph = buildJsonPackageDependencyGraph(index, dataElement.key, { mode: "direct" });
+        const graph = buildJsonPackageDependencyGraph.execute(index, dataElement.key, { mode: "direct" });
 
         const comboIds = graph.nodes
             .filter(node => node.type === "categoryCombos")
@@ -420,7 +422,7 @@ describe("json-package-utils", () => {
 
         const index = indexJsonPackage(metadataPackage);
         const dataSet = requireFirst(index.entriesByType.dataSets, "dataSets");
-        const graph = buildJsonPackageDependencyGraph(index, dataSet.key, 250);
+        const graph = buildJsonPackageDependencyGraph.execute(index, dataSet.key, 250);
 
         const sectionIds = graph.nodes
             .filter(node => node.type === "sections")
@@ -458,7 +460,7 @@ describe("json-package-utils", () => {
 
         const index = indexJsonPackage(metadataPackage);
         const dashboard = requireFirst(index.entriesByType.dashboards, "dashboards");
-        const graph = buildJsonPackageDependencyGraph(index, dashboard.key);
+        const graph = buildJsonPackageDependencyGraph.execute(index, dashboard.key);
 
         const mapIds = graph.nodes
             .filter(node => node.type === "maps")

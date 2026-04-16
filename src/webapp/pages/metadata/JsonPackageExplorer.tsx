@@ -12,7 +12,7 @@ import {
     JsonPackageGraphMode,
     JsonPackageIndex,
 } from "$/domain/metadata/JsonPackageIndex";
-import { buildJsonPackageDependencyGraph } from "$/domain/usecases/metadata/BuildJsonPackageDependencyGraphUseCase";
+import { useAppContext } from "$/webapp/contexts/app-context";
 
 type JsonPackageState =
     | { type: "idle" }
@@ -21,6 +21,7 @@ type JsonPackageState =
     | { type: "error"; error: string };
 
 export const JsonPackageExplorer: React.FC = () => {
+    const { compositionRoot } = useAppContext();
     const [state, setState] = React.useState<JsonPackageState>({ type: "idle" });
     const [selectedType, setSelectedType] = React.useState("");
     const [selectedEntryKey, setSelectedEntryKey] = React.useState("");
@@ -102,8 +103,10 @@ export const JsonPackageExplorer: React.FC = () => {
 
     const graph = React.useMemo(() => {
         if (!loadedData || !selectedEntry) return null;
-        return buildJsonPackageDependencyGraph(loadedData, selectedEntry.key, { mode: graphMode });
-    }, [graphMode, loadedData, selectedEntry]);
+        return compositionRoot.metadata.jsonPackageGraph.execute(loadedData, selectedEntry.key, {
+            mode: graphMode,
+        });
+    }, [compositionRoot, graphMode, loadedData, selectedEntry]);
 
     const handleFocus = React.useCallback((node: GraphNode) => {
         setSelectedType(node.type);
