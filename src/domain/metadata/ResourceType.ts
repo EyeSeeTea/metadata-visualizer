@@ -37,8 +37,8 @@ export function getMetadataTypeLabel(type: string): string {
 
     if (!words.length) return type;
 
-    const [first, ...rest] = words;
-    return `${first}${rest.map(capitalizeWord).join("")}`;
+    const [first = "", ...rest] = words;
+    return [capitalizeWord(first), ...rest].join(" ");
 }
 
 function capitalizeWord(word: string): string {
