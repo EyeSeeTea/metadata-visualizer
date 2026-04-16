@@ -1,9 +1,10 @@
+import { describe, expect, it } from "vitest";
 import { indexJsonPackage } from "$/domain/metadata/JsonPackageIndex";
 import { BuildJsonPackageDependencyGraphUseCase } from "$/domain/usecases/metadata/BuildJsonPackageDependencyGraphUseCase";
 
 const buildJsonPackageDependencyGraph = new BuildJsonPackageDependencyGraphUseCase();
 
-describe("json-package-utils", () => {
+describe("BuildJsonPackageDependencyGraphUseCase", () => {
     it("indexes metadata arrays by type and builds dependency graph transitively", () => {
         const metadataPackage = {
             dataElements: [
