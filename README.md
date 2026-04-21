@@ -35,8 +35,8 @@ Produce the distributable DHIS2 zip:
 $ yarn build
 ```
 
-The output is placed under `build/`, together with the `.zip` ready to upload via App
-Management.
+The web build output is placed under `build/`. The `.zip` ready to upload via App
+Management is written to the repository root.
 
 ## Tests
 
