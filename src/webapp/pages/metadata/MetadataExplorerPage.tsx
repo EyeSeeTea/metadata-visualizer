@@ -12,6 +12,7 @@ import {
 } from "$/webapp/components/metadata/MetadataQueryBuilder";
 import { MetadataTable } from "$/webapp/components/metadata/MetadataTable";
 import { MetadataGraphPanel } from "$/webapp/components/metadata/MetadataGraphPanel";
+import { JsonPackageExplorer } from "$/webapp/pages/metadata/JsonPackageExplorer";
 import { useFuture } from "$/webapp/hooks/useFuture";
 import "./MetadataExplorerPage.css";
 
@@ -33,6 +34,8 @@ const initialQuery: MetadataQueryState = {
     paging: true,
 };
 
+type ExplorerTab = "instance" | "load";
+
 export const MetadataExplorerPage: React.FC = () => {
     const { compositionRoot } = useAppContext();
     const [queryState, setQueryState] = React.useState<MetadataQueryState>(initialQuery);
@@ -40,6 +43,7 @@ export const MetadataExplorerPage: React.FC = () => {
         buildQuery(initialQuery)
     );
     const [selectedItem, setSelectedItem] = React.useState<MetadataItem | null>(null);
+    const [activeTab, setActiveTab] = React.useState<ExplorerTab>("instance");
 
     const listState = useFuture<MetadataList>(
         () => compositionRoot.metadata.list.execute(activeQuery),
@@ -92,79 +96,124 @@ export const MetadataExplorerPage: React.FC = () => {
 
     return (
         <div className="metadata-explorer">
-            <MetadataQueryBuilder
-                value={queryState}
-                onChange={setQueryState}
-                onTypeChange={handleTypeChange}
-                onRun={handleRun}
-            />
-
-            <div className="metadata-summary">
-                {listState.type === "loading" && <span>{i18n.t("Loading results...")}</span>}
-                {listState.type === "error" && (
-                    <span className="metadata-summary__error">{listState.error.message}</span>
-                )}
-                {listState.type === "loaded" && (
-                    <span>
-                        {total !== undefined
-                            ? i18n.t("{{total}} total", { total })
-                            : i18n.t("{{itemCount}} items", {
-                                  itemCount: listState.data.items.length,
-                              })}
-                        {queryState.paging
-                            ? ` • ${i18n.t("page {{page}} of {{pageCount}}", {
-                                  page: queryState.page,
-                                  pageCount,
-                              })}`
-                            : ""}
-                    </span>
-                )}
+            <div className="metadata-tabs" role="tablist" aria-label={i18n.t("Metadata views")}>
+                <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === "instance"}
+                    className={
+                        activeTab === "instance"
+                            ? "metadata-tab metadata-tab--active"
+                            : "metadata-tab"
+                    }
+                    onClick={() => setActiveTab("instance")}
+                >
+                    {i18n.t("Instance Metadata")}
+                </button>
+                <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === "load"}
+                    className={
+                        activeTab === "load"
+                            ? "metadata-tab metadata-tab--active"
+                            : "metadata-tab"
+                    }
+                    onClick={() => setActiveTab("load")}
+                >
+                    {i18n.t("JSON Package")}
+                </button>
             </div>
 
-            <div className="metadata-content">
-                <div className="metadata-list">
-                    {listState.type === "loaded" && (
-                        <MetadataTable
-                            items={listState.data.items}
-                            type={queryState.type}
-                            fields={queryState.fields}
-                            selectedId={selectedItem?.id}
-                            onSelect={handleSelect}
-                        />
-                    )}
-                    {listState.type === "loading" && (
-                        <div className="metadata-table__empty">
-                            {i18n.t("Fetching metadata...")}
-                        </div>
-                    )}
-
-                    <div className="metadata-pager">
-                        <button
-                            type="button"
-                            className="metadata-pager__button"
-                            onClick={() => handlePageChange(queryState.page - 1)}
-                            disabled={!canPrev || listState.type !== "loaded"}
-                        >
-                            {i18n.t("Prev")}
-                        </button>
-                        <button
-                            type="button"
-                            className="metadata-pager__button"
-                            onClick={() => handlePageChange(queryState.page + 1)}
-                            disabled={!canNext || listState.type !== "loaded"}
-                        >
-                            {i18n.t("Next")}
-                        </button>
-                    </div>
-                </div>
-
-                <div className="metadata-graph">
-                    <MetadataGraphPanel
-                        selectedItem={selectedItem}
-                        onFocusItem={handleFocusFromGraph}
+            {activeTab === "instance" ? (
+                <>
+                    <MetadataQueryBuilder
+                        value={queryState}
+                        onChange={setQueryState}
+                        onTypeChange={handleTypeChange}
+                        onRun={handleRun}
                     />
+
+                    <div className="metadata-summary">
+                        {listState.type === "loading" && (
+                            <span>{i18n.t("Loading results...")}</span>
+                        )}
+                        {listState.type === "error" && (
+                            <span className="metadata-summary__error">
+                                {listState.error.message}
+                            </span>
+                        )}
+                        {listState.type === "loaded" && (
+                            <span>
+                                {total !== undefined
+                                    ? i18n.t("{{total}} total", { total })
+                                    : i18n.t("{{itemCount}} items", {
+                                          itemCount: listState.data.items.length,
+                                      })}
+                                {queryState.paging
+                                    ? ` • ${i18n.t("page {{page}} of {{pageCount}}", {
+                                          page: queryState.page,
+                                          pageCount,
+                                      })}`
+                                    : ""}
+                            </span>
+                        )}
+                    </div>
+
+                    <div className="metadata-content">
+                        <div className="metadata-list">
+                            {listState.type === "loaded" && (
+                                <MetadataTable
+                                    items={listState.data.items}
+                                    type={queryState.type}
+                                    fields={queryState.fields}
+                                    selectedId={selectedItem?.id}
+                                    onSelect={handleSelect}
+                                />
+                            )}
+                            {listState.type === "loading" && (
+                                <div className="metadata-table__empty">
+                                    {i18n.t("Fetching metadata...")}
+                                </div>
+                            )}
+
+                            <div className="metadata-pager">
+                                <button
+                                    type="button"
+                                    className="metadata-pager__button"
+                                    onClick={() => handlePageChange(queryState.page - 1)}
+                                    disabled={!canPrev || listState.type !== "loaded"}
+                                >
+                                    {i18n.t("Prev")}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="metadata-pager__button"
+                                    onClick={() => handlePageChange(queryState.page + 1)}
+                                    disabled={!canNext || listState.type !== "loaded"}
+                                >
+                                    {i18n.t("Next")}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="metadata-graph">
+                            <MetadataGraphPanel
+                                selectedItem={selectedItem}
+                                onFocusItem={handleFocusFromGraph}
+                            />
+                        </div>
+                    </div>
+                </>
+            ) : (
+                <div
+                    className="metadata-import"
+                    role="tabpanel"
+                    aria-label={i18n.t("JSON Package")}
+                >
+                    <JsonPackageExplorer />
                 </div>
-            </div>
+            )}
         </div>
     );
 };

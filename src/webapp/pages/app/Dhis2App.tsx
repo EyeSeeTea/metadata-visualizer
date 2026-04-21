@@ -1,6 +1,7 @@
 import React from "react";
 import { Provider } from "@dhis2/app-runtime";
 import { App } from "./App";
+import i18n from "$/utils/i18n";
 
 export function Dhis2App() {
     const [baseUrlRes, setBaseUrlRes] = React.useState<BaseUrlResult>({ type: "loading" });
@@ -21,7 +22,7 @@ export function Dhis2App() {
 
     switch (baseUrlRes.type) {
         case "loading":
-            return <h3>Loading...</h3>;
+            return <h3>{i18n.t("Loading...")}</h3>;
         case "error": {
             const { baseUrl, error } = baseUrlRes.error;
             const fallbackBaseUrl = baseUrl || "/dhis2";
@@ -29,7 +30,7 @@ export function Dhis2App() {
                 <div style={{ margin: 20 }}>
                     <h3>{error.message}</h3>
                     <a rel="noopener noreferrer" target="_blank" href={fallbackBaseUrl}>
-                        Login {fallbackBaseUrl}
+                        {i18n.t("Login {{baseUrl}}", { baseUrl: fallbackBaseUrl })}
                     </a>
                 </div>
             );
@@ -71,7 +72,7 @@ async function getBaseUrlFromManifest(): Promise<string> {
     const { href } = manifest.activities.dhis;
 
     if (!href || href === "*") {
-        throw new Error("Base URL not found in manifest.webapp (see DHIS2-19708)");
+        throw new Error(i18n.t("Base URL not found in manifest.webapp (see DHIS2-19708)"));
     } else {
         return href;
     }

@@ -3,6 +3,7 @@ import { MetadataItem } from "$/domain/metadata/MetadataItem";
 import { ResourceType } from "$/domain/metadata/ResourceType";
 import { getTopLevelFieldName, splitTopLevelFields } from "$/domain/metadata/fields";
 import { IdenticonAvatar } from "$/webapp/components/metadata/IdenticonAvatar";
+import i18n from "$/utils/i18n";
 
 type MetadataTableProps = {
     items: MetadataItem[];
@@ -22,14 +23,16 @@ export const MetadataTable: React.FC<MetadataTableProps> = ({
     const columns = React.useMemo(() => buildColumns(fields), [fields]);
 
     if (!items.length) {
-        return <div className="metadata-table__empty">No results</div>;
+        return <div className="metadata-table__empty">{i18n.t("No results")}</div>;
     }
 
     return (
         <table className="metadata-table">
             <thead>
                 <tr>
-                    <th className="metadata-table__cell metadata-table__cell--avatar">Avatar</th>
+                    <th className="metadata-table__cell metadata-table__cell--avatar">
+                        {i18n.t("Avatar")}
+                    </th>
                     {columns.map(column => (
                         <th key={column.key} className="metadata-table__cell">
                             {column.key}

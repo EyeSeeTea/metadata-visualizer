@@ -8,6 +8,7 @@ import { UserTestRepository } from "$/data/repositories/UserTestRepository";
 import { MetadataRepository } from "$/domain/repositories/MetadataRepository";
 import { SystemRepository } from "$/domain/repositories/SystemRepository";
 import { UserRepository } from "$/domain/repositories/UserRepository";
+import { BuildJsonPackageDependencyGraphUseCase } from "$/domain/usecases/metadata/BuildJsonPackageDependencyGraphUseCase";
 import { BuildMetadataGraphUseCase } from "$/domain/usecases/metadata/BuildMetadataGraphUseCase";
 import { ListCategoryOptionCombosUseCase } from "$/domain/usecases/metadata/ListCategoryOptionCombosUseCase";
 import { ListMetadataUseCase } from "$/domain/usecases/metadata/ListMetadataUseCase";
@@ -33,6 +34,7 @@ function getCompositionRoot(repositories: Repositories) {
         metadata: {
             list: new ListMetadataUseCase(repositories),
             graph: new BuildMetadataGraphUseCase(repositories),
+            jsonPackageGraph: new BuildJsonPackageDependencyGraphUseCase(),
             listCategoryOptionCombos: new ListCategoryOptionCombosUseCase(repositories),
         },
     };

@@ -1,9 +1,10 @@
 import React from "react";
 import { GraphGroup, GraphNode, MetadataGraph } from "$/domain/metadata/MetadataGraph";
-import { resourceTypeLabels } from "$/domain/metadata/ResourceType";
+import { getMetadataTypeLabel } from "$/domain/metadata/ResourceType";
 import { IdenticonAvatar } from "$/webapp/components/metadata/IdenticonAvatar";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import CenterFocusStrongIcon from "@material-ui/icons/CenterFocusStrong";
+import i18n from "$/utils/i18n";
 
 type MetadataGraphViewProps = {
     graph: MetadataGraph;
@@ -25,8 +26,11 @@ export const MetadataGraphView: React.FC<MetadataGraphViewProps> = ({
     onFocus,
 }) => {
     const containerRef = React.useRef<HTMLDivElement | null>(null);
+    const dragRef = React.useRef<DragState>(null);
+    const didDragRef = React.useRef(false);
     const nodeRefs = React.useRef<Record<string, HTMLDivElement | null>>({});
     const [lines, setLines] = React.useState<Line[]>([]);
+    const [isDragging, setIsDragging] = React.useState(false);
     const [canvasSize, setCanvasSize] = React.useState<{ width: number; height: number }>({
         width: 0,
         height: 0,
@@ -36,10 +40,14 @@ export const MetadataGraphView: React.FC<MetadataGraphViewProps> = ({
         return new Map(graph.nodes.map(node => [node.key, node]));
     }, [graph.nodes]);
 
-    const parentGroups = graph.groups.filter(group => group.direction === "parent");
-    const childGroups = graph.groups.filter(group => group.direction === "child");
-    const leftGroups = parentGroups.length > 0 ? parentGroups : childGroups;
-    const rightGroups = parentGroups.length > 0 ? childGroups : [];
+    const orderedGroups = React.useMemo(() => {
+        const parentGroups = graph.groups.filter(group => group.direction === "parent");
+        const childGroups = graph.groups.filter(group => group.direction === "child");
+        if (parentGroups.length > 0 && childGroups.length > 0) {
+            return [...parentGroups, ...childGroups];
+        }
+        return graph.groups;
+    }, [graph.groups]);
 
     // Cache per-key ref callbacks so each <GraphNodeCard> receives a stable callback
     // across renders. Without this, React would remount the ref callback every render
@@ -94,9 +102,60 @@ export const MetadataGraphView: React.FC<MetadataGraphViewProps> = ({
     }, [graph.edges, graph.nodes, graph.groups]);
 
     const centerNode = nodeMap.get(graph.center);
+    const centerTypeLabel = centerNode ? getMetadataTypeLabel(centerNode.type) : "";
+
+    const handlePointerDown = React.useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+        if (!event.isPrimary || event.button !== 0) return;
+        if (event.target instanceof Element && event.target.closest(".graph-node")) return;
+
+        didDragRef.current = false;
+        dragRef.current = {
+            pointerId: event.pointerId,
+            startX: event.clientX,
+            startScrollLeft: event.currentTarget.scrollLeft,
+        };
+        event.currentTarget.setPointerCapture(event.pointerId);
+    }, []);
+
+    const handlePointerMove = React.useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+        const drag = dragRef.current;
+        if (!drag || drag.pointerId !== event.pointerId) return;
+
+        const deltaX = event.clientX - drag.startX;
+        if (Math.abs(deltaX) > 2) {
+            didDragRef.current = true;
+            setIsDragging(true);
+            event.preventDefault();
+        }
+
+        event.currentTarget.scrollLeft = drag.startScrollLeft - deltaX;
+    }, []);
+
+    const handlePointerEnd = React.useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+        const drag = dragRef.current;
+        if (!drag || drag.pointerId !== event.pointerId) return;
+
+        event.currentTarget.releasePointerCapture(event.pointerId);
+        dragRef.current = null;
+        setIsDragging(false);
+    }, []);
+
+    const handleClickCapture = React.useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+        if (!didDragRef.current) return;
+        event.preventDefault();
+        event.stopPropagation();
+        didDragRef.current = false;
+    }, []);
 
     return (
-        <div className="graph-layout">
+        <div
+            className={isDragging ? "graph-layout graph-layout--dragging" : "graph-layout"}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerEnd}
+            onPointerCancel={handlePointerEnd}
+            onClickCapture={handleClickCapture}
+        >
             <div className="graph-layout__canvas" ref={containerRef}>
                 <svg
                     className="graph-layout__edges"
@@ -116,22 +175,11 @@ export const MetadataGraphView: React.FC<MetadataGraphViewProps> = ({
                 </svg>
 
                 <div className="graph-layout__columns">
-                    {leftGroups.map(group => (
-                        <GraphGroupColumn
-                            key={group.id}
-                            group={group}
-                            nodeMap={nodeMap}
-                            registerNode={registerNode}
-                            onOpenApi={onOpenApi}
-                            onFocus={onFocus}
-                        />
-                    ))}
-
                     <div className="graph-layout__column graph-layout__column--center">
                         {centerNode && (
                             <>
                                 <div className="graph-layout__group-title">
-                                    {resourceTypeLabels[centerNode.type]} (1)
+                                    {centerTypeLabel} (1)
                                 </div>
                                 <GraphNodeCard
                                     node={centerNode}
@@ -144,7 +192,7 @@ export const MetadataGraphView: React.FC<MetadataGraphViewProps> = ({
                         )}
                     </div>
 
-                    {rightGroups.map(group => (
+                    {orderedGroups.map(group => (
                         <GraphGroupColumn
                             key={group.id}
                             group={group}
@@ -159,6 +207,12 @@ export const MetadataGraphView: React.FC<MetadataGraphViewProps> = ({
         </div>
     );
 };
+
+type DragState = {
+    pointerId: number;
+    startX: number;
+    startScrollLeft: number;
+} | null;
 
 const GraphGroupColumn: React.FC<{
     group: GraphGroup;
@@ -222,22 +276,26 @@ const GraphNodeCard: React.FC<{
                         {node.id}
                     </span>
                     <span className="graph-node__actions">
-                        <button
-                            type="button"
-                            className="graph-node__action"
-                            title="Open API"
-                            onClick={() => onOpenApi?.(node)}
-                        >
-                            <OpenInNewIcon fontSize="small" />
-                        </button>
-                        <button
-                            type="button"
-                            className="graph-node__action"
-                            title="Focus in graph"
-                            onClick={() => onFocus?.(node)}
-                        >
-                            <CenterFocusStrongIcon fontSize="small" />
-                        </button>
+                        {onOpenApi && (
+                            <button
+                                type="button"
+                                className="graph-node__action"
+                                title={i18n.t("Open API")}
+                                onClick={() => onOpenApi(node)}
+                            >
+                                <OpenInNewIcon fontSize="small" />
+                            </button>
+                        )}
+                        {onFocus && (
+                            <button
+                                type="button"
+                                className="graph-node__action"
+                                title={i18n.t("Focus in graph")}
+                                onClick={() => onFocus(node)}
+                            >
+                                <CenterFocusStrongIcon fontSize="small" />
+                            </button>
+                        )}
                     </span>
                 </div>
             </div>

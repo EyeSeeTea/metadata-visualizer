@@ -5,10 +5,9 @@ import {
     identiconSeed,
     sha256Hex,
 } from "$/domain/metadata/Identicon";
-import { ResourceType } from "$/domain/metadata/ResourceType";
 
 type IdenticonAvatarProps = {
-    type: ResourceType;
+    type: string;
     uid: string;
     size?: number;
     className?: string;
