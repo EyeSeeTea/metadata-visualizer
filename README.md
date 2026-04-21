@@ -1,41 +1,42 @@
-## Quick Start (From Scratch)
+# Metadata Visualizer
+
+DHIS2 web app (React 18 + TypeScript + Vite) to explore and visualize metadata
+relationships as interactive 2D/3D graphs.
+
+## Installation
+
+Requirements: Node 22 (see `.nvmrc`) and Yarn 4 (via `corepack`).
 
 ```
 $ nvm use
 $ corepack enable
 $ yarn install
-$ cp .env.example .env.local
-# Edit .env.local with your DHIS2 instance values
+```
+
+Copy `.env.example` to `.env.local` and configure the target DHIS2 instance
+(`VITE_DHIS2_BASE_URL`, `DHIS2_AUTH`).
+
+## Development
+
+Start the development server:
+
+```
 $ yarn start
 ```
 
-Open `http://localhost:8081`.
-
-## Setup
-
-```
-$ nvm use # uses Node 22 from .nvmrc
-$ corepack enable
-$ yarn install
-```
+Open `http://localhost:8081`. Requests to DHIS2 are transparently proxied from
+`/dhis2/...` to `VITE_DHIS2_BASE_URL` (see `vite.config.ts`) to avoid CORS issues.
 
 ## Build
 
-Build a production distributable DHIS2 zip file:
+Produce the distributable DHIS2 zip:
 
 ```
 $ yarn build
 ```
 
-## Development
-
-Copy `.env.example` to `.env.local` and configure the DHIS2 instance to use. Then start the development server:
-
-```
-$ yarn start
-```
-
-Now in your browser, go to `http://localhost:8081`.
+The output is placed under `build/`, together with the `.zip` ready to upload via App
+Management.
 
 ## Tests
 
@@ -43,50 +44,52 @@ Now in your browser, go to `http://localhost:8081`.
 $ yarn test
 ```
 
-## Some development tips
+## Features
 
-### Clean architecture folder structure
+The app is organized in two main tabs:
 
--   `src/domain`: Domain layer (entities, resource types, repository definitions)
--   `src/application`: Application layer (use cases)
--   `src/data`: Infrastructure layer (DHIS2 data engine repositories)
--   `src/webapp/pages`: Main React pages.
--   `src/webapp/components`: React components.
--   `src/utils`: Misc utilities.
--   `i18n/`: Contains literal translations (gettext format)
--   `public/`: General non-React webapp resources.
+### 1. Instance Metadata
 
-## Data structures
+Live queries against the configured DHIS2 instance.
 
--   `Future.ts`: Async values, similar to promises, but cancellables and with type-safe errors.
--   `Collection.ts`: Similar to Lodash, provides a wrapper over JS arrays.
--   `Obj.ts`: Similar to Lodash, provides a wrapper over JS objects.
--   `HashMap.ts`: Similar to ES6 map, but immutable.
--   `Struct.ts`: Base class for typical classes with attributes. Features: create, update.
--   `Either.ts`: Either a success value or an error.
+- Pick the **resource type** (data elements, data sets, categories, category combos,
+  category options, category option combos).
+- Adjust **fields** and **filters** (standard DHIS2 API syntax, one filter per line or
+  separated by `;`).
+- The table shows paginated results; selecting a row renders the dependency graph of
+  that item on the right panel.
 
-## Docs
+### 2. JSON Package
 
-We use [TypeDoc](https://typedoc.org/example/):
+Load a metadata package exported as JSON (for example, from the DHIS2 import/export
+module) and explore its relationships without needing a live instance.
+
+- Upload the `.json`, filter by type / id / name and pick an item to view its graph.
+- **Direct only** mode: shows just the references directly declared in the JSON.
+- **Expanded** mode: follows references transitively within the package.
+
+### Graph views
+
+On both tabs the graph panel offers three visualization modes:
+
+- **2D View** — flat layout, best for seeing the structure at a glance.
+- **3D Tree** — 3D force-directed graph (based on `react-force-graph-3d`).
+- **3D Timeline** — 3D layout grouping nodes by type / level.
+
+Clicking a node in the graph selects it as the new focus and recomputes its
+dependencies.
+
+## Architecture
+
+Clean Architecture with three layers (`src/domain`, `src/data`, `src/webapp`) and a
+`CompositionRoot` as the single dependency-injection point. Use cases live under
+`src/domain/usecases/`. More details in `.claude/CLAUDE.md` and `openspec/`.
+
+## i18n
+
+After adding or modifying `i18n.t(...)` strings:
 
 ```
-$ yarn generate-docs
-```
-
-### i18n
-
-Update i18n .po files from `i18n.t(...)` calls in the source code:
-
-```
+$ yarn extract-pot
 $ yarn localize
 ```
-
-### Scripts
-
-Standalone scripts live in `src/scripts/` and are run via `yarn run-script <path>` (e.g. `yarn run-script src/scripts/zip-build.ts`).
-
-### Misc Notes
-
--   Requests to DHIS2 will be transparently proxied (see `vite.config.ts` -> `server.proxy`) from `http://localhost:8081/dhis2/xyz` to `${VITE_DHIS2_BASE_URL}/xyz`. This prevents CORS and cross-domain problems.
-
--   You can use `.env` variables within the React app: `const value = import.meta.env.NAME;`
