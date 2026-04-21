@@ -24,8 +24,9 @@ Start the development server:
 $ yarn start
 ```
 
-Open `http://localhost:8081`. Requests to DHIS2 are transparently proxied from
-`/dhis2/...` to `VITE_DHIS2_BASE_URL` (see `vite.config.ts`) to avoid CORS issues.
+Open `http://localhost:<VITE_PORT>` (default: `http://localhost:8081`). Requests to
+DHIS2 are transparently proxied from `/dhis2/...` to `VITE_DHIS2_BASE_URL` (see
+`vite.config.ts`) to avoid CORS issues.
 
 ## Build
 
