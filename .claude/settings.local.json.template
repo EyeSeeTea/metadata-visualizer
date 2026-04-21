@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:docs.dhis2.org)",
+      "Bash(openspec:*)",
+      "Bash(npx openspec:*)",
+      "Bash(gh api:*)",
+      "Bash(gh pr:*)",
+      "Bash(yarn:*)",
+      "Bash(npx vitest:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npx prettier:*)"
+    ]
+  }
+}

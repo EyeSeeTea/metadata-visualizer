@@ -1,19 +1,24 @@
 /// <reference types="vitest" />
-import { UserConfig, defineConfig, loadEnv } from "vite";
+import { ProxyOptions, UserConfig, defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import checker from "vite-plugin-checker";
-import nodePolyfills from "vite-plugin-node-stdlib-browser";
+import { execSync } from "child_process";
 import * as path from "path";
 
 export default ({ mode }): UserConfig => {
-    const env = { ...process.env, ...loadEnv(mode, process.cwd()) };
+    const env = { ...process.env, ...loadEnv(mode, process.cwd(), "") };
     const proxy = getProxy(env);
+    const buildCommit = resolveBuildCommit();
+    const buildTime = resolveBuildTime(env);
 
     // https://vitejs.dev/config/
     return defineConfig({
         base: "", // Relative paths
+        define: {
+            __APP_BUILD_COMMIT__: JSON.stringify(buildCommit),
+            __APP_BUILD_TIME__: JSON.stringify(buildTime),
+        },
         plugins: [
-            nodePolyfills(),
             react(),
             checker({
                 overlay: false,
@@ -33,6 +38,7 @@ export default ({ mode }): UserConfig => {
         },
         server: {
             port: parseInt(env.VITE_PORT),
+            host: "127.0.0.1",
             proxy: proxy,
         },
         resolve: {
@@ -45,7 +51,7 @@ export default ({ mode }): UserConfig => {
 
 function getProxy(env: Record<string, string>) {
     const dhis2UrlVar = "VITE_DHIS2_BASE_URL";
-    const dhis2AuthVar = "VITE_DHIS2_AUTH";
+    const dhis2AuthVar = "DHIS2_AUTH";
     const targetUrl = env[dhis2UrlVar];
     const auth = env[dhis2AuthVar];
     const isBuild = env.NODE_ENV === "production";
@@ -55,17 +61,34 @@ function getProxy(env: Record<string, string>) {
     } else if (!targetUrl) {
         console.error(`Set ${dhis2UrlVar}`);
         process.exit(1);
-    } else if (!auth) {
-        console.error(`Set ${dhis2AuthVar}`);
-        process.exit(1);
     } else {
-        return {
+        const proxy: Record<string, ProxyOptions> = {
             "/dhis2": {
                 target: targetUrl,
                 changeOrigin: true,
-                auth: auth,
                 rewrite: path => path.replace(/^\/dhis2/, ""),
+                ...(auth ? { auth } : {}),
             },
         };
+
+        return proxy;
     }
+}
+
+function resolveBuildCommit() {
+    try {
+        return execSync("git rev-parse --short=12 HEAD", { stdio: ["ignore", "pipe", "ignore"] })
+            .toString()
+            .trim();
+    } catch {
+        return "unknown";
+    }
+}
+
+function resolveBuildTime(env: Record<string, string>) {
+    if (env.VITE_APP_BUILD_TIME) {
+        return env.VITE_APP_BUILD_TIME;
+    }
+
+    return new Date().toISOString();
 }

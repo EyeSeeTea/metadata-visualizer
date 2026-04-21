@@ -5,13 +5,51 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2024-06-26T10:58:19.149Z\n"
-"PO-Revision-Date: 2024-06-26T10:58:19.149Z\n"
+"POT-Creation-Date: 2026-04-13T07:00:14.840Z\n"
+"PO-Revision-Date: 2026-04-13T07:00:14.840Z\n"
 
-msgid "Add"
+msgid "Select a row to view relationships."
 msgstr ""
 
-msgid "List"
+msgid "Loading graph..."
+msgstr ""
+
+msgid ""
+"3D view unavailable in this browser. Falling back to 2D. Enable "
+"WebGL/WebGPU to use the 3D view."
+msgstr ""
+
+msgid "Loading 3D view..."
+msgstr ""
+
+msgid "Visualization"
+msgstr ""
+
+msgid "2D View"
+msgstr ""
+
+msgid "3D Tree"
+msgstr ""
+
+msgid "3D Timeline"
+msgstr ""
+
+msgid "Loading..."
+msgstr ""
+
+msgid "Retry"
+msgstr ""
+
+msgid "Load more category option combos"
+msgstr ""
+
+msgid "Colors"
+msgstr ""
+
+msgid "Textures"
+msgstr ""
+
+msgid "Click to focus - Right click opens the API"
 msgstr ""
 
 msgid "Back"
@@ -20,11 +58,23 @@ msgstr ""
 msgid "Help"
 msgstr ""
 
-msgid "Hello {{name}}"
+msgid "Loading results..."
 msgstr ""
 
-msgid "Detail page"
+msgid "{{total}} total"
 msgstr ""
 
-msgid "Section"
+msgid "{{itemCount}} items"
+msgstr ""
+
+msgid "page {{page}} of {{pageCount}}"
+msgstr ""
+
+msgid "Fetching metadata..."
+msgstr ""
+
+msgid "Prev"
+msgstr ""
+
+msgid "Next"
 msgstr ""

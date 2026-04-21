@@ -1,7 +1,21 @@
+## Quick Start (From Scratch)
+
+```
+$ nvm use
+$ corepack enable
+$ yarn install
+$ cp .env.example .env.local
+# Edit .env.local with your DHIS2 instance values
+$ yarn start
+```
+
+Open `http://localhost:8081`.
+
 ## Setup
 
 ```
-$ nvm use # uses node version in .nvmrc
+$ nvm use # uses Node 22 from .nvmrc
+$ corepack enable
 $ yarn install
 ```
 
@@ -15,7 +29,7 @@ $ yarn build
 
 ## Development
 
-Copy `.env` to `.env.local` and configure DHIS2 instance to use. Then start the development server:
+Copy `.env.example` to `.env.local` and configure the DHIS2 instance to use. Then start the development server:
 
 ```
 $ yarn start
@@ -33,9 +47,10 @@ $ yarn test
 
 ### Clean architecture folder structure
 
--   `src/domain`: Domain layer of the app (entities, use cases, repository definitions)
--   `src/data`: Data of the app (repository implementations)
--   `src/webapp/pages`: Main React components.
+-   `src/domain`: Domain layer (entities, resource types, repository definitions)
+-   `src/application`: Application layer (use cases)
+-   `src/data`: Infrastructure layer (DHIS2 data engine repositories)
+-   `src/webapp/pages`: Main React pages.
 -   `src/webapp/components`: React components.
 -   `src/utils`: Misc utilities.
 -   `i18n/`: Contains literal translations (gettext format)
@@ -68,7 +83,7 @@ $ yarn localize
 
 ### Scripts
 
-Check the example script, entry `"script-example"`in `package.json`->scripts and `src/scripts/example.ts`.
+Standalone scripts live in `src/scripts/` and are run via `yarn run-script <path>` (e.g. `yarn run-script src/scripts/zip-build.ts`).
 
 ### Misc Notes
 
