@@ -5,6 +5,7 @@ import {
     ResourceType,
 } from "$/domain/metadata/ResourceType";
 import { MAX_PAGE_SIZE } from "$/domain/metadata/pagination";
+import i18n from "$/utils/i18n";
 
 export type MetadataQueryState = {
     type: ResourceType;
@@ -32,7 +33,7 @@ export const MetadataQueryBuilder: React.FC<MetadataQueryBuilderProps> = ({
         <section className="metadata-query">
             <div className="metadata-query__row">
                 <label className="metadata-query__label">
-                    Resource type
+                    {i18n.t("Resource type")}
                     <select
                         className="metadata-query__input"
                         value={value.type}
@@ -47,7 +48,7 @@ export const MetadataQueryBuilder: React.FC<MetadataQueryBuilderProps> = ({
                 </label>
 
                 <label className="metadata-query__label">
-                    Fields
+                    {i18n.t("Fields")}
                     <input
                         className="metadata-query__input"
                         type="text"
@@ -60,7 +61,7 @@ export const MetadataQueryBuilder: React.FC<MetadataQueryBuilderProps> = ({
 
             <div className="metadata-query__row">
                 <label className="metadata-query__label metadata-query__label--grow">
-                    Filters (one per line or separated by ;)
+                    {i18n.t("Filters (one per line or separated by ;)")}
                     <textarea
                         className="metadata-query__input metadata-query__textarea"
                         value={value.filters}
@@ -73,7 +74,7 @@ export const MetadataQueryBuilder: React.FC<MetadataQueryBuilderProps> = ({
 
             <div className="metadata-query__row metadata-query__row--compact">
                 <label className="metadata-query__label">
-                    Page
+                    {i18n.t("Page")}
                     <input
                         className="metadata-query__input metadata-query__input--number"
                         type="number"
@@ -89,7 +90,7 @@ export const MetadataQueryBuilder: React.FC<MetadataQueryBuilderProps> = ({
                     />
                 </label>
                 <label className="metadata-query__label">
-                    Page size
+                    {i18n.t("Page size")}
                     <input
                         className="metadata-query__input metadata-query__input--number"
                         type="number"
@@ -117,11 +118,11 @@ export const MetadataQueryBuilder: React.FC<MetadataQueryBuilderProps> = ({
                             onChange({ ...value, paging: !event.target.checked, page: 1 })
                         }
                     />
-                    Fetch all (paging=false)
+                    {i18n.t("Fetch all (paging=false)")}
                 </label>
 
                 <button className="metadata-query__button" type="button" onClick={onRun}>
-                    Fetch
+                    {i18n.t("Fetch")}
                 </button>
             </div>
         </section>

@@ -1,9 +1,8 @@
 import { Id } from "$/domain/entities/Ref";
-import { ResourceType } from "$/domain/metadata/ResourceType";
 
 export type GraphNode = {
     key: string;
-    type: ResourceType;
+    type: string;
     id: Id;
     displayName: string;
 };
@@ -33,6 +32,6 @@ export type MetadataGraph = {
     };
 };
 
-export function graphNodeKey(type: ResourceType, id: Id): string {
+export function graphNodeKey(type: string, id: Id): string {
     return `${type}:${id}`;
 }

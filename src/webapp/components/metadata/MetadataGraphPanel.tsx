@@ -7,6 +7,7 @@ import {
     MetadataGraph,
     graphNodeKey,
 } from "$/domain/metadata/MetadataGraph";
+import { isResourceType, resourceTypeLabels } from "$/domain/metadata/ResourceType";
 import { MetadataItem, MetadataList } from "$/domain/metadata/MetadataItem";
 import { useAppContext } from "$/webapp/contexts/app-context";
 import { MetadataGraphView } from "$/webapp/components/metadata/MetadataGraphView";
@@ -167,6 +168,7 @@ export const MetadataGraphPanel: React.FC<MetadataGraphPanelProps> = ({
     };
 
     const handleFocus = (node: GraphNode) => {
+        if (!isResourceType(node.type)) return;
         onFocusItem({ id: node.id, type: node.type, displayName: node.displayName });
     };
 
@@ -309,7 +311,7 @@ function mergeCategoryOptionCombos(graph: MetadataGraph, combos: MetadataItem[])
     const filteredGroups = graph.groups.filter(group => group.id !== groupId);
     const group: GraphGroup = {
         id: groupId,
-        title: "Category option combos",
+        title: resourceTypeLabels.categoryOptionCombos,
         nodeKeys: newNodes.map(node => node.key),
         direction: "child",
     };
