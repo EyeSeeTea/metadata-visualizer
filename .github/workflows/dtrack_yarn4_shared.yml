@@ -1,0 +1,11 @@
+name: DTrack Yarn4 (shared)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened]
+
+jobs:
+  yarn4:
+    uses: EyeSeeTea/security-tests/.github/workflows/generate_bom_v4.yml@feature/dependanbot-actions
+    secrets: inherit

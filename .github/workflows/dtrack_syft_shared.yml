@@ -1,0 +1,11 @@
+name: DTrack Syft (shared)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened]
+
+jobs:
+  syft:
+    uses: EyeSeeTea/security-tests/.github/workflows/generate_bom_syft.yml@feature/dependanbot-actions
+    secrets: inherit
