@@ -13,7 +13,4 @@ export const buildInfo: BuildInfo = {
     builtAt: builtAt || "unknown",
 };
 
-export const feedbackDescriptionTemplate = [
-    `Build commit: ${buildInfo.commit}`,
-    "",
-].join("\n");
+export const feedbackDescriptionTemplate = [`Build commit: ${buildInfo.commit}`, ""].join("\n");

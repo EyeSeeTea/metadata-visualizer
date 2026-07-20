@@ -58,9 +58,9 @@ function resolveMsgmergeCommand(): string | null {
     }
 
     const knownPaths = [
-        "C:\\\\msys64\\\\usr\\\\bin\\\\msgmerge.exe",
-        "C:\\\\msys64\\\\mingw64\\\\bin\\\\msgmerge.exe",
-        "C:\\\\Program Files\\\\gettext\\\\bin\\\\msgmerge.exe",
+        "C:\\msys64\\usr\\bin\\msgmerge.exe",
+        "C:\\msys64\\mingw64\\bin\\msgmerge.exe",
+        "C:\\Program Files\\gettext\\bin\\msgmerge.exe",
     ];
 
     for (const candidate of knownPaths) {

@@ -13,6 +13,8 @@ msgstr ""
 
 msgid "List"
 msgstr ""
+"POT-Creation-Date: 2026-04-14T15:22:40.054Z\n"
+"PO-Revision-Date: 2026-04-14T15:22:40.054Z\n"
 
 msgid "Select a row to view relationships."
 msgstr ""
@@ -20,16 +22,12 @@ msgstr ""
 msgid "Loading graph..."
 msgstr ""
 
-msgid "Loading..."
+msgid ""
+"3D view unavailable in this browser. Falling back to 2D. Enable "
+"WebGL/WebGPU to use the 3D view."
 msgstr ""
 
-msgid "Load combos"
-msgstr ""
-
-msgid "Load more"
-msgstr ""
-
-msgid "All loaded"
+msgid "Loading 3D view..."
 msgstr ""
 
 msgid "Visualization"
@@ -42,6 +40,15 @@ msgid "3D Tree"
 msgstr ""
 
 msgid "3D Timeline"
+msgstr ""
+
+msgid "Loading..."
+msgstr ""
+
+msgid "Retry"
+msgstr ""
+
+msgid "Load more category option combos"
 msgstr ""
 
 msgid "Open API"
@@ -99,15 +106,6 @@ msgid "Login {{baseUrl}}"
 msgstr ""
 
 msgid "Base URL not found in manifest.webapp (see DHIS2-19708)"
-msgstr ""
-
-msgid "Hello {{name}}"
-msgstr ""
-
-msgid "Detail page"
-msgstr ""
-
-msgid "Section"
 msgstr ""
 
 msgid "Unknown JSON parsing error"
@@ -171,6 +169,9 @@ msgid "Loading results..."
 msgstr ""
 
 msgid "{{total}} total"
+msgstr ""
+
+msgid "{{itemCount}} items"
 msgstr ""
 
 msgid "page {{page}} of {{pageCount}}"

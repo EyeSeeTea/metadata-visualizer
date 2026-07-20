@@ -1,15 +1,14 @@
 /// <reference types="vitest" />
-import { UserConfig, defineConfig, loadEnv } from "vite";
+import { ProxyOptions, UserConfig, defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import checker from "vite-plugin-checker";
-import nodePolyfills from "vite-plugin-node-stdlib-browser";
 import { execSync } from "child_process";
 import { readFileSync } from "fs";
 import * as path from "path";
 
 export default ({ mode }): UserConfig => {
     const env = { ...process.env, ...loadEnv(mode, process.cwd(), "") };
-    const proxy = getProxy(env);
+    const proxy = getProxy(env, mode);
     const appTitle = resolveAppTitle();
     const buildCommit = resolveBuildCommit();
     const buildTime = resolveBuildTime(env);
@@ -22,7 +21,6 @@ export default ({ mode }): UserConfig => {
             __APP_BUILD_TIME__: JSON.stringify(buildTime),
         },
         plugins: [
-            nodePolyfills(),
             injectAppTitlePlugin(appTitle),
             react(),
             checker({
@@ -79,30 +77,31 @@ function resolveAppTitle() {
     }
 }
 
-function getProxy(env: Record<string, string>) {
+function getProxy(env: Record<string, string>, mode: string) {
     const dhis2UrlVar = "VITE_DHIS2_BASE_URL";
     const dhis2AuthVar = "DHIS2_AUTH";
     const targetUrl = env[dhis2UrlVar];
     const auth = env[dhis2AuthVar];
     const isBuild = env.NODE_ENV === "production";
+    // The proxy is only needed by the dev server (`vite dev`, mode === "development").
+    // Other modes — vitest loads this config too but never hits the proxy — should
+    // skip the VITE_DHIS2_BASE_URL check so CI can load the config.
+    const isDevServer = mode === "development";
 
-    if (isBuild) {
+    if (isBuild || !isDevServer) {
         return {};
     } else if (!targetUrl) {
         console.error(`Set ${dhis2UrlVar}`);
         process.exit(1);
     } else {
-        const proxy: Record<string, any> = {
+        const proxy: Record<string, ProxyOptions> = {
             "/dhis2": {
                 target: targetUrl,
                 changeOrigin: true,
                 rewrite: path => path.replace(/^\/dhis2/, ""),
+                ...(auth ? { auth } : {}),
             },
         };
-
-        if (auth) {
-            proxy["/dhis2"].auth = auth;
-        }
 
         return proxy;
     }

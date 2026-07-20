@@ -19,7 +19,8 @@
         "baseUrl": "./src",
         "paths": {
             "$/*": ["./*"]
-        }
+        },
+        "types": ["node", "material-ui", "testing-library__jest-dom", "vitest/globals"]
     },
     "include": ["src"],
     "references": [{ "path": "./tsconfig.node.json" }]

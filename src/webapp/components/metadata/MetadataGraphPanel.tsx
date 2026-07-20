@@ -11,8 +11,17 @@ import { isResourceType, resourceTypeLabels } from "$/domain/metadata/ResourceTy
 import { MetadataItem, MetadataList } from "$/domain/metadata/MetadataItem";
 import { useAppContext } from "$/webapp/contexts/app-context";
 import { MetadataGraphView } from "$/webapp/components/metadata/MetadataGraphView";
-import { MetadataGraphView3D } from "$/webapp/components/metadata/MetadataGraphView3D";
+import { ErrorBoundary } from "$/webapp/components/error-boundary/ErrorBoundary";
+import { useFuture } from "$/webapp/hooks/useFuture";
 import i18n from "$/utils/i18n";
+
+// Lazy-load the 3D view so that the top-level `import * as THREE from "three"` is only
+// executed once the user selects the 3D option. On browsers without WebGL/WebGPU the
+// three.js module evaluation throws (e.g. "GPUShaderStage is undefined"); isolating
+// that failure behind a dynamic import + error boundary keeps the rest of the app usable.
+const MetadataGraphView3D = React.lazy(
+    () => import("$/webapp/components/metadata/MetadataGraphView3D")
+);
 
 type MetadataGraphPanelProps = {
     selectedItem: MetadataItem | null;
@@ -27,7 +36,6 @@ export const MetadataGraphPanel: React.FC<MetadataGraphPanelProps> = ({
 }) => {
     const { baseUrl } = useConfig();
     const { compositionRoot } = useAppContext();
-    const [graphState, setGraphState] = React.useState<GraphState>({ type: "idle" });
     const [cocState, setCocState] = React.useState<CocState>({
         type: "idle",
         items: [],
@@ -35,78 +43,97 @@ export const MetadataGraphPanel: React.FC<MetadataGraphPanelProps> = ({
         pageSize: defaultCocPageSize,
     });
     const [graphView, setGraphView] = React.useState<GraphViewMode>("layout2d");
-    const requestId = React.useRef(0);
+    const cocCancelRef = React.useRef<(() => void) | null>(null);
+    const autoLoadKeyRef = React.useRef<string | null>(null);
 
+    const graphState = useFuture<MetadataGraph>(
+        () =>
+            selectedItem
+                ? compositionRoot.metadata.graph.execute({
+                      type: selectedItem.type,
+                      id: selectedItem.id,
+                  })
+                : null,
+        [compositionRoot, selectedItem?.id, selectedItem?.type]
+    );
+
+    // Reset combo state and cancel any in-flight combo request when the selection changes
+    // or when the panel unmounts. Keeping this isolated from the auto-load effect avoids
+    // the race where putting `cocState.type` in an effect's deps would cancel the request
+    // it just kicked off.
     React.useEffect(() => {
-        if (!selectedItem) {
-            setGraphState({ type: "idle" });
-            return;
-        }
-
-        const currentRequest = ++requestId.current;
-        setGraphState({ type: "loading" });
-
-        compositionRoot.metadata.graph
-            .execute({ type: selectedItem.type, id: selectedItem.id })
-            .toPromise()
-            .then(data => {
-                if (requestId.current !== currentRequest) return;
-                setGraphState({ type: "loaded", data });
-            })
-            .catch(error => {
-                if (requestId.current !== currentRequest) return;
-                setGraphState({ type: "error", error });
-            });
-    }, [compositionRoot, selectedItem]);
-
-    React.useEffect(() => {
+        autoLoadKeyRef.current = null;
         setCocState({ type: "idle", items: [], page: 1, pageSize: defaultCocPageSize });
+        return () => {
+            cocCancelRef.current?.();
+            cocCancelRef.current = null;
+        };
     }, [selectedItem?.id, selectedItem?.type]);
 
     const lazyCombo =
         graphState.type === "loaded" ? graphState.data.lazy?.categoryOptionCombos : undefined;
 
-    const handleLoadMore = React.useCallback(() => {
+    const loadCombosPage = React.useCallback(
+        (pageToLoad: number): void => {
+            if (!lazyCombo) return;
+
+            // Cancel any prior in-flight combo request before starting a new one.
+            cocCancelRef.current?.();
+
+            setCocState(prev => ({ ...prev, type: "loading" }));
+
+            cocCancelRef.current =
+                compositionRoot.metadata.listCategoryOptionCombos
+                    .execute({
+                        categoryComboId: lazyCombo.categoryComboId,
+                        page: pageToLoad,
+                        pageSize: cocState.pageSize,
+                    })
+                    .run(
+                        data => {
+                            cocCancelRef.current = null;
+                            setCocState(prev => ({
+                                type: "loaded",
+                                items:
+                                    pageToLoad === 1 ? data.items : [...prev.items, ...data.items],
+                                pager: data.pager,
+                                page: pageToLoad,
+                                pageSize: prev.pageSize,
+                            }));
+                        },
+                        error => {
+                            cocCancelRef.current = null;
+                            setCocState(prev => ({ ...prev, type: "error", error }));
+                        }
+                    ) ?? null;
+        },
+        [compositionRoot, cocState.pageSize, lazyCombo]
+    );
+
+    const handleLoadMore = React.useCallback((): void => {
         if (!lazyCombo || cocState.type === "loading") return;
         const basePage = cocState.items.length ? cocState.page : 0;
-        const pageToLoad = basePage + 1;
+        loadCombosPage(basePage + 1);
+    }, [cocState.items.length, cocState.page, cocState.type, lazyCombo, loadCombosPage]);
 
-        setCocState(prev => ({ ...prev, type: "loading" }));
-
-        compositionRoot.metadata.listCategoryOptionCombos
-            .execute({
-                categoryComboId: lazyCombo.categoryComboId,
-                page: pageToLoad,
-                pageSize: cocState.pageSize,
-            })
-            .toPromise()
-            .then(data => {
-                setCocState(prev => ({
-                    type: "loaded",
-                    items: pageToLoad === 1 ? data.items : [...prev.items, ...data.items],
-                    pager: data.pager,
-                    page: pageToLoad,
-                    pageSize: prev.pageSize,
-                }));
-            })
-            .catch(error => {
-                setCocState(prev => ({ ...prev, type: "error", error }));
-            });
-    }, [
-        compositionRoot,
-        cocState.items.length,
-        cocState.page,
-        cocState.pageSize,
-        cocState.type,
-        lazyCombo,
-    ]);
-
+    // Auto-load page 1 when the graph is ready. The ref-based guard makes this fire exactly
+    // once per (selectedItem, categoryCombo) pair. We intentionally do NOT return a cleanup
+    // here: cancellation is handled by the selectedItem-change effect above and by
+    // loadCombosPage cancelling its own predecessor.
     React.useEffect(() => {
         if (graphState.type !== "loaded") return;
-        if (!graphState.data.lazy?.categoryOptionCombos) return;
-        if (cocState.type !== "idle") return;
-        handleLoadMore();
-    }, [graphState, cocState.type, handleLoadMore]);
+        const lazy = graphState.data.lazy?.categoryOptionCombos;
+        if (!lazy) return;
+        const key = `${selectedItem?.type ?? ""}:${selectedItem?.id ?? ""}:${lazy.categoryComboId}`;
+        if (autoLoadKeyRef.current === key) return;
+        autoLoadKeyRef.current = key;
+        loadCombosPage(1);
+    }, [graphState, selectedItem?.id, selectedItem?.type, loadCombosPage]);
+
+    const mergedGraph = React.useMemo(() => {
+        if (graphState.type !== "loaded") return null;
+        return mergeCategoryOptionCombos(graphState.data, cocState.items);
+    }, [graphState, cocState.items]);
 
     if (!selectedItem) {
         return (
@@ -124,26 +151,16 @@ export const MetadataGraphPanel: React.FC<MetadataGraphPanelProps> = ({
         return <div className="metadata-graph__placeholder">{graphState.error.message}</div>;
     }
 
-    if (graphState.type !== "loaded") {
+    if (graphState.type !== "loaded" || !mergedGraph) {
         return null;
     }
 
-    const mergedGraph = mergeCategoryOptionCombos(graphState.data, cocState.items);
-
     const cocPager = cocState.pager;
-    const cocTotal = cocPager?.total;
-    const cocCanLoadMore = cocPager
-        ? cocState.page < cocPager.pageCount
-        : cocState.type !== "loaded";
-
-    const lazyButtonLabel =
-        cocState.type === "loading"
-            ? i18n.t("Loading...")
-            : cocState.type === "idle"
-            ? i18n.t("Load combos")
-            : cocCanLoadMore
-            ? i18n.t("Load more")
-            : i18n.t("All loaded");
+    const cocCanLoadMore = cocPager ? cocState.page < cocPager.pageCount : false;
+    // Only surface the lazy combos UI when there is something actionable: a load failure
+    // (so the user can retry) or more pages available beyond the auto-loaded first page.
+    // The happy path stays clutter-free — the combos are merged into the graph silently.
+    const showLazyCombos = Boolean(lazyCombo) && (cocState.type === "error" || cocCanLoadMore);
 
     const handleOpenApi = (node: GraphNode) => {
         const link = buildApiLink(baseUrl, node.type, node.id);
@@ -154,6 +171,40 @@ export const MetadataGraphPanel: React.FC<MetadataGraphPanelProps> = ({
         if (!isResourceType(node.type)) return;
         onFocusItem({ id: node.id, type: node.type, displayName: node.displayName });
     };
+
+    const render2D = () => (
+        <MetadataGraphView graph={mergedGraph} onOpenApi={handleOpenApi} onFocus={handleFocus} />
+    );
+
+    const render3D = (layoutMode: "radial" | "timeline") => (
+        <ErrorBoundary
+            fallback={() => (
+                <div className="metadata-graph__fallback">
+                    <div className="metadata-graph__alert" role="alert">
+                        {i18n.t(
+                            "3D view unavailable in this browser. Falling back to 2D. Enable WebGL/WebGPU to use the 3D view."
+                        )}
+                    </div>
+                    {render2D()}
+                </div>
+            )}
+        >
+            <React.Suspense
+                fallback={
+                    <div className="metadata-graph__placeholder">
+                        {i18n.t("Loading 3D view...")}
+                    </div>
+                }
+            >
+                <MetadataGraphView3D
+                    graph={mergedGraph}
+                    layoutMode={layoutMode}
+                    onOpenApi={handleOpenApi}
+                    onFocus={handleFocus}
+                />
+            </React.Suspense>
+        </ErrorBoundary>
+    );
 
     return (
         <div className="metadata-graph__panel">
@@ -173,55 +224,37 @@ export const MetadataGraphPanel: React.FC<MetadataGraphPanelProps> = ({
                 </select>
             </div>
 
-            {graphView === "force3d" ? (
-                <MetadataGraphView3D
-                    graph={mergedGraph}
-                    onOpenApi={handleOpenApi}
-                    onFocus={handleFocus}
-                />
-            ) : graphView === "timeline3d" ? (
-                <MetadataGraphView3D
-                    graph={mergedGraph}
-                    layoutMode="timeline"
-                    onOpenApi={handleOpenApi}
-                    onFocus={handleFocus}
-                />
-            ) : (
-                <MetadataGraphView
-                    graph={mergedGraph}
-                    onOpenApi={handleOpenApi}
-                    onFocus={handleFocus}
-                />
-            )}
+            {graphView === "force3d"
+                ? render3D("radial")
+                : graphView === "timeline3d"
+                ? render3D("timeline")
+                : render2D()}
 
-            {lazyCombo && (
+            {showLazyCombos && (
                 <div className="metadata-graph__lazy">
-                    <div className="metadata-graph__lazy-header">
-                        {resourceTypeLabels.categoryOptionCombos}{" "}
-                        {cocTotal !== undefined ? `(${cocTotal})` : ""}
-                    </div>
                     {cocState.type === "error" && (
-                        <div className="metadata-graph__lazy-error">{cocState.error?.message}</div>
+                        <div className="metadata-graph__lazy-error" role="alert">
+                            {i18n.t("Failed to load category option combos:")}{" "}
+                            {cocState.error.message}
+                        </div>
                     )}
                     <button
                         type="button"
                         className="metadata-graph__lazy-button"
                         onClick={handleLoadMore}
-                        disabled={cocState.type === "loading" || !cocCanLoadMore}
+                        disabled={cocState.type === "loading"}
                     >
-                        {lazyButtonLabel}
+                        {cocState.type === "loading"
+                            ? i18n.t("Loading...")
+                            : cocState.type === "error"
+                            ? i18n.t("Retry")
+                            : i18n.t("Load more category option combos")}
                     </button>
                 </div>
             )}
         </div>
     );
 };
-
-type GraphState =
-    | { type: "idle" }
-    | { type: "loading" }
-    | { type: "loaded"; data: MetadataGraph }
-    | { type: "error"; error: Error };
 
 type CocState =
     | {

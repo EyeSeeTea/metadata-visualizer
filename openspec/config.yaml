@@ -1,0 +1,189 @@
+schema: spec-driven
+
+context: |
+  Project: Metadata Visualizer (EyeSeeTea DHIS2 app)
+
+  What it is:
+  - A DHIS2 web application that visualizes metadata dependencies and relationships
+    (data elements, datasets, organisation units, indicators, programs, etc.)
+    as interactive 3D graphs to help users explore and audit metadata.
+  - Runs inside a DHIS2 instance as a bundled web app (manifest.webapp), consuming
+    the DHIS2 Web API via @eyeseetea/d2-api. No custom backend — DHIS2 is the backend.
+
+  Tech stack:
+  - TypeScript 5.7 (strict, ESNext target, path alias `$/*` → `src/`)
+  - React 18 + React Router DOM 5
+  - Vite 4 (build), Yarn 4 (package manager), Node 22
+  - Vitest + @testing-library/react + jsdom (unit tests)
+  - Playwright (under src/tests/playwright, excluded from vitest)
+  - @dhis2/app-runtime, @dhis2/ui, @dhis2/d2-i18n
+  - @eyeseetea/d2-api (DHIS2 Web API client), @eyeseetea/d2-ui-components
+  - Material-UI v4 + styled-components + styled-jsx
+  - react-force-graph-3d + three.js (3D graph visualization)
+  - purify-ts (Either / Maybe / Future for functional error handling)
+  - real-cancellable-promise (async cancellation), typed-immutable-map
+
+  Directory structure (Clean Architecture, EyeSeeTea convention):
+  - src/
+    - domain/            # Domain layer (pure TS, no framework, no I/O)
+      - entities/        # Value objects and domain types
+      - metadata/        # Metadata-specific domain helpers
+      - repositories/    # Repository interfaces only
+      - usecases/        # Use cases — orchestrate repositories (NO separate `application/`)
+        - metadata/
+        - system/
+        - users/
+    - data/              # Concrete repository implementations (DHIS2 API adapters)
+      - repositories/
+    - webapp/            # Presentation layer (React)
+      - components/
+      - pages/
+      - contexts/
+      - utils/
+      - main.tsx
+    - CompositionRoot.ts # Dependency injection container
+    - utils/             # Cross-cutting utilities (pure)
+    - types/             # Shared TypeScript types
+    - scripts/           # One-off tsx scripts
+    - tests/             # Test setup and Playwright suites
+    - locales/           # Generated JSON locales (from i18n/*.po)
+  - i18n/                # Gettext .po / .pot translation sources
+  - config/              # Vite / build config
+  - public/              # Static assets shipped with the app
+  - manifest.webapp      # DHIS2 app manifest
+
+  Configuration:
+  - .env.example / .env / .env.production — DHIS2 base URL, auth, port
+  - vite.config.ts — dev proxy to DHIS2 at `/dhis2`
+  - tsconfig.json — strict mode, `$/*` alias, noUncheckedIndexedAccess
+  - manifest.webapp — DHIS2 app metadata (name, version, entry point)
+
+  Canonical commands (yarn):
+  - Dev:            `yarn start` (Vite dev server with strict port)
+  - Build:          `yarn build` (localize → build-folder → zip-build)
+  - Test:           `yarn test` → `yarn test-unit` → `vitest run --reporter=basic`
+  - Test (watch):   `yarn test-unit-watch`
+  - Lint:           `yarn lint` (ESLint over src/)
+  - Lint (all):     `yarn lint-all` (lint + lint-unused)
+  - Typecheck:      `yarn tsc --noEmit`
+  - Format:         `yarn prettify`
+  - i18n extract:   `yarn extract-pot`
+  - i18n build:     `yarn localize`
+  - Pre-commit gate: `yarn check-code` (lint + test)
+  - Docs:           `yarn generate-docs` (TypeDoc)
+
+  Code conventions:
+  - Absolute imports only via `$/...` alias — no relative imports across layers
+    (enforced by eslint-plugin-no-relative-import-paths).
+  - Unused variables are allowed only if prefixed with `_`.
+  - No `console.log` (only `console.debug`, `console.warn`, `console.error`).
+  - Prefer purify-ts (`Either`, `Maybe`, `Future`) over throwing exceptions for
+    domain-level error handling.
+  - Prefer functional, declarative patterns over imperative loops with mutable
+    accumulators (`map` / `flatMap` / `filter` / `reduce`).
+  - Use `Readonly<T>` / `ReadonlyArray<T>` for data structures not mutated after
+    creation. Immutability is the default.
+  - Derive union types from `as const` arrays when runtime values are also needed.
+  - File / folder naming: kebab-case for folders, PascalCase for components and
+    their files, camelCase for hooks and utilities.
+  - All user-facing strings must go through `i18n.t(...)` from `@dhis2/d2-i18n`.
+  - Testing-Library: prefer accessible queries (`getByRole`, `getByLabelText`),
+    `await` async queries, use `screen.*` entry points.
+
+  Architecture: Clean Architecture (EyeSeeTea flavor — use cases live inside domain)
+  - Layers (inner → outer): `domain` ← `data` ← `webapp`
+  - `domain/` has zero dependencies on DHIS2, React, I/O, or any framework. It contains:
+      - `domain/entities/` — pure value objects and types
+      - `domain/repositories/` — interfaces (the contract with the outside world)
+      - `domain/usecases/` — use cases orchestrating repositories and entities
+    There is NO top-level `application/` folder — this is an EyeSeeTea convention shared
+    across all DHIS2 apps in the organization.
+  - `data/` implements `domain/repositories/` interfaces against the DHIS2 Web API. All
+    network / persistence calls live here. Raw DHIS2 payloads never leak out of `data/`.
+  - `webapp/` is wiring + presentation only: components, pages, contexts, hooks.
+    No business logic, no direct API calls — it consumes use cases through the
+    `CompositionRoot`.
+  - `CompositionRoot.ts` is the single dependency-injection point that instantiates
+    repositories and use cases and exposes them to the presentation layer.
+
+  Git workflow:
+  - Branches start from `master` (this repo's default) unless the work depends on
+    another unmerged feature branch — then branch from that one and merge back to it.
+  - Branch naming: `feature/<name>`, `fix/<name>`, `chore/<name>`, `refactor/<name>`.
+  - Commits follow Conventional Commits (`feat(scope): ...`, `fix(scope): ...`, etc.).
+  - Husky `pre-push` runs `prettify + lint + update-po + test` — never bypass it.
+  - CI lives in `.github/workflows/main.yml` (EyeSeeTea shared workflows + Syft SBOM).
+
+  Non-goals (do NOT introduce):
+  - A custom backend server — the app is a DHIS2 web app; DHIS2 is the API.
+  - Direct `fetch` / `axios` calls from `webapp/` — always go through a repository.
+  - Business logic in React components — push it into `domain/usecases/`.
+  - A top-level `src/application/` folder — use cases live in `src/domain/usecases/`.
+  - Mutating domain entities in place — return new values.
+  - New styling systems — keep the existing MUI v4 + styled-components stack.
+  - Introducing a new state-management library — use React contexts + hooks.
+  - Relative cross-layer imports (`../../domain/...`) — always use `$/...`.
+
+  Extension principles:
+  - New metadata types or visualizations: add entities + repository interfaces in
+    `domain/`, use cases in `domain/usecases/`, DHIS2 adapters in `data/`, UI in `webapp/`.
+  - New DHIS2 API calls: add the method on the relevant `domain/repositories/`
+    interface first, then implement it in `data/repositories/` using `@eyeseetea/d2-api`.
+  - New pages: register the route in the webapp router and wire dependencies
+    through `CompositionRoot`, not by importing repositories directly.
+  - New translated strings: wrap in `i18n.t(...)` and run `yarn extract-pot` +
+    `yarn localize` before committing.
+
+  Testing strategy:
+  - Unit tests live next to the code they cover as `*.spec.ts` / `*.spec.tsx`
+    (also `__tests__/` folders where it improves clarity).
+  - Vitest runs under jsdom; setup file is `src/tests/setup.js`.
+  - Domain (entities, use cases) is the primary test target — it should be testable
+    with zero DHIS2 mocking beyond fake repositories.
+  - Data-layer repositories are tested with recorded fixtures or fake `d2-api`
+    responses, not live DHIS2 calls.
+  - Presentation tests use @testing-library/react with accessible queries.
+  - Playwright E2E tests under `src/tests/playwright/` — excluded from vitest.
+  - Prefer concrete assertions (`toEqual`, `toBe`) over `toBeDefined` / `toBeTruthy`.
+
+  Code style:
+  - Prefer functional/declarative patterns over imperative loops with mutable state
+  - Use flatMap, find, reduce, map, filter instead of for...of + push/break
+  - Avoid mutating function arguments or shared state — return new objects/arrays
+  - Apply immutability comprehensively; use Readonly<T> for data structures
+  - Prefer composition over inheritance
+  - Prefer purify-ts `Either` / `Maybe` / `Future` over throwing for domain errors
+
+rules:
+  project:
+    - "Specs first: before modifying any behavior, check openspec/specs/ for existing specs. If behavior is unclear, read the spec. If no spec exists, propose one under openspec/changes/."
+    - "Follow code conventions as defined in the project context above."
+    - "New code goes in the correct layer: domain (pure), application (use cases), data (DHIS2 adapters), webapp (React presentation)."
+    - "Clean Architecture: `domain/` must have zero framework/infrastructure dependencies. All external access goes through repository interfaces defined in `domain/repositories/` and implemented in `data/repositories/`."
+    - "Webapp is wiring + presentation: no direct DHIS2 API calls, no business logic — consume use cases through `CompositionRoot`."
+    - "Use the `$/` path alias for all cross-module imports. Never use relative paths that cross layer boundaries."
+    - "Git: branch from `master` (the default) unless depending on an unmerged feature branch. Use `feature/<name>`, `fix/<name>`, `chore/<name>`, `refactor/<name>`. All commits must follow Conventional Commits."
+    - "Never bypass the Husky `pre-push` hook — if it fails, fix the underlying issue."
+    - "Definition of Done: specs updated, code aligns with specs, `yarn check-code` passes, translations extracted (`yarn extract-pot`) if user-facing strings changed, and no public interfaces are changed without a proposal."
+    - "Boy Scout Rule: leave every file you touch cleaner than you found it."
+
+  proposal:
+    - "Must include: Goals, Non-goals, User impact, Compatibility (including DHIS2 version compatibility when relevant), and Rollback plan."
+    - "If changing public interfaces (domain repository signatures, use-case contracts, exported webapp components), explicitly list old vs new."
+    - "If the change touches DHIS2 metadata queries, note which metadata types and endpoints are affected."
+
+  design:
+    - "Must describe: data flow from `webapp` → `application` → `domain` (interface) → `data` (DHIS2 adapter) → DHIS2 API."
+    - "Note known constraints (DHIS2 API limitations, performance of large metadata graphs, memory footprint of react-force-graph-3d, etc.)."
+    - "UI design gate: when a change includes user-facing UI, the design phase MUST produce wireframes or mockups in Pencil (`.pen` files) before implementation begins. Designs are stored in `openspec/designs/` and exported to `openspec/designs/exports/`."
+
+  tasks:
+    - "Include at least one task for tests when behavior changes."
+    - "Include a task to update `openspec/specs/` when behavior changes."
+    - "Include a task to run `yarn extract-pot` + `yarn localize` when user-facing strings change."
+    - "Tag each task with the responsible agent role: [FE] frontend, [DI] DHIS2-integration (data+application layers), [GD] graphical-designer, [CR] code-reviewer, [PM] project-manager."
+
+  specs:
+    - "Tests are the behavioral source of truth. Specs provide design context that tests cannot express (goals, non-goals, design decisions, rationale)."
+    - "Specs and tests are complementary: specs capture the 'why', tests capture the 'what'."
+    - "Keep specs lean: avoid duplicating in markdown what is already asserted by well-named tests."

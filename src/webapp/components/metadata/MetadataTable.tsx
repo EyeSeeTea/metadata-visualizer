@@ -1,6 +1,7 @@
 import React from "react";
 import { MetadataItem } from "$/domain/metadata/MetadataItem";
 import { ResourceType } from "$/domain/metadata/ResourceType";
+import { getTopLevelFieldName, splitTopLevelFields } from "$/domain/metadata/fields";
 import { IdenticonAvatar } from "$/webapp/components/metadata/IdenticonAvatar";
 import i18n from "$/utils/i18n";
 
@@ -76,55 +77,14 @@ type Column = {
 };
 
 function buildColumns(fields: string): Column[] {
-    const requestedKeys = splitTopLevel(fields)
-        .map(getTopLevelKey)
-        .filter((key): key is string => Boolean(key));
+    const requestedKeys = splitTopLevelFields(fields)
+        .map(getTopLevelFieldName)
+        .filter(key => key.length > 0);
 
     const keys = ["id", "displayName", ...requestedKeys];
     const uniqueKeys = Array.from(new Set(keys));
 
     return uniqueKeys.map(key => ({ key }));
-}
-
-function getTopLevelKey(token: string): string {
-    const trimmed = token.trim();
-    if (!trimmed) return "";
-    const bracketIndex = trimmed.indexOf("[");
-    return (bracketIndex === -1 ? trimmed : trimmed.slice(0, bracketIndex)).trim();
-}
-
-function splitTopLevel(value: string): string[] {
-    const tokens: string[] = [];
-    let current = "";
-    let depth = 0;
-
-    for (const char of value) {
-        if (char === "[") {
-            depth += 1;
-            current += char;
-            continue;
-        }
-
-        if (char === "]") {
-            depth = Math.max(0, depth - 1);
-            current += char;
-            continue;
-        }
-
-        if (char === "," && depth === 0) {
-            const token = current.trim();
-            if (token) tokens.push(token);
-            current = "";
-            continue;
-        }
-
-        current += char;
-    }
-
-    const lastToken = current.trim();
-    if (lastToken) tokens.push(lastToken);
-
-    return tokens;
 }
 
 function formatValue(value: unknown): string {

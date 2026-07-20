@@ -3,15 +3,16 @@ import { GraphNode } from "$/domain/metadata/MetadataGraph";
 import { getMetadataTypeLabel } from "$/domain/metadata/ResourceType";
 import { IdenticonAvatar } from "$/webapp/components/metadata/IdenticonAvatar";
 import { MetadataGraphView } from "$/webapp/components/metadata/MetadataGraphView";
-import { MetadataGraphView3D } from "$/webapp/components/metadata/MetadataGraphView3D";
+import MetadataGraphView3D from "$/webapp/components/metadata/MetadataGraphView3D";
 import i18n from "$/utils/i18n";
 import {
-    buildJsonPackageDependencyGraph,
     indexJsonPackage,
+    isJsonPackageGraphMode,
     JsonPackageEntry,
     JsonPackageGraphMode,
     JsonPackageIndex,
-} from "$/webapp/pages/metadata/json-package-utils";
+} from "$/domain/metadata/JsonPackageIndex";
+import { useAppContext } from "$/webapp/contexts/app-context";
 
 type JsonPackageState =
     | { type: "idle" }
@@ -20,6 +21,7 @@ type JsonPackageState =
     | { type: "error"; error: string };
 
 export const JsonPackageExplorer: React.FC = () => {
+    const { compositionRoot } = useAppContext();
     const [state, setState] = React.useState<JsonPackageState>({ type: "idle" });
     const [selectedType, setSelectedType] = React.useState("");
     const [selectedEntryKey, setSelectedEntryKey] = React.useState("");
@@ -101,8 +103,10 @@ export const JsonPackageExplorer: React.FC = () => {
 
     const graph = React.useMemo(() => {
         if (!loadedData || !selectedEntry) return null;
-        return buildJsonPackageDependencyGraph(loadedData, selectedEntry.key, { mode: graphMode });
-    }, [graphMode, loadedData, selectedEntry]);
+        return compositionRoot.metadata.jsonPackageGraph.execute(loadedData, selectedEntry.key, {
+            mode: graphMode,
+        });
+    }, [compositionRoot, graphMode, loadedData, selectedEntry]);
 
     const handleFocus = React.useCallback((node: GraphNode) => {
         setSelectedType(node.type);
@@ -243,9 +247,10 @@ export const JsonPackageExplorer: React.FC = () => {
                                     id="metadata-package-graph-view"
                                     className="metadata-graph__select"
                                     value={graphView}
-                                    onChange={event =>
-                                        setGraphView(event.target.value as GraphViewMode)
-                                    }
+                                    onChange={event => {
+                                        const value = event.target.value;
+                                        if (isGraphViewMode(value)) setGraphView(value);
+                                    }}
                                 >
                                     <option value="layout2d">{i18n.t("2D View")}</option>
                                     <option value="force3d">{i18n.t("3D Tree")}</option>
@@ -262,9 +267,10 @@ export const JsonPackageExplorer: React.FC = () => {
                                     id="metadata-package-graph-mode"
                                     className="metadata-graph__select"
                                     value={graphMode}
-                                    onChange={event =>
-                                        setGraphMode(event.target.value as JsonPackageGraphMode)
-                                    }
+                                    onChange={event => {
+                                        const value = event.target.value;
+                                        if (isJsonPackageGraphMode(value)) setGraphMode(value);
+                                    }}
                                 >
                                     <option value="direct">{i18n.t("Direct only")}</option>
                                     <option value="expanded">{i18n.t("Expanded")}</option>
@@ -325,4 +331,9 @@ function countEntries(index: JsonPackageIndex): number {
     return index.types.reduce((acc, type) => acc + (index.entriesByType[type]?.length ?? 0), 0);
 }
 
-type GraphViewMode = "layout2d" | "force3d" | "timeline3d";
+const graphViewModes = ["layout2d", "force3d", "timeline3d"] as const;
+type GraphViewMode = (typeof graphViewModes)[number];
+
+function isGraphViewMode(value: string): value is GraphViewMode {
+    return (graphViewModes as readonly string[]).includes(value);
+}

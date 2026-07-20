@@ -55,3 +55,10 @@ dist/
 !.yarn/versions
 !.yarn/versions/**
 
+# Claude Code local settings (per-user permissions, not shared)
+.claude/settings.local.json
+.claude/memory/
+
+# Temporary reference copy of the ai-dev-skeleton (to be removed)
+/reference/
+
