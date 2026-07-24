@@ -14,7 +14,6 @@ import { MetadataTable } from "$/webapp/components/metadata/MetadataTable";
 import { MetadataGraphPanel } from "$/webapp/components/metadata/MetadataGraphPanel";
 import { JsonPackageExplorer } from "$/webapp/pages/metadata/JsonPackageExplorer";
 import { OrgUnitExplorerPage } from "$/webapp/pages/orgUnits/OrgUnitExplorerPage";
-import i18n from "$/utils/i18n";
 import { useFuture } from "$/webapp/hooks/useFuture";
 import "./MetadataExplorerPage.css";
 
@@ -36,7 +35,7 @@ const initialQuery: MetadataQueryState = {
     paging: true,
 };
 
-type ExplorerTab = "instance" | "load";
+type ExplorerTab = "instance" | "load" | "orgUnits";
 
 export const MetadataExplorerPage: React.FC = () => {
     const { compositionRoot } = useAppContext();
@@ -117,9 +116,7 @@ export const MetadataExplorerPage: React.FC = () => {
                     role="tab"
                     aria-selected={activeTab === "load"}
                     className={
-                        activeTab === "load"
-                            ? "metadata-tab metadata-tab--active"
-                            : "metadata-tab"
+                        activeTab === "load" ? "metadata-tab metadata-tab--active" : "metadata-tab"
                     }
                     onClick={() => setActiveTab("load")}
                 >
@@ -220,7 +217,7 @@ export const MetadataExplorerPage: React.FC = () => {
                         </div>
                     </div>
                 </>
-            ) : (
+            ) : activeTab === "load" ? (
                 <div
                     className="metadata-import"
                     role="tabpanel"

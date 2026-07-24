@@ -41,7 +41,9 @@ describe("BuildJsonPackageDependencyGraphUseCase", () => {
     });
 
     it("fails with invalid package root", () => {
-        expect(() => indexJsonPackage([])).toThrow("Invalid package format: expected a JSON object");
+        expect(() => indexJsonPackage([])).toThrow(
+            "Invalid package format: expected a JSON object"
+        );
     });
 
     it("ignores nested references outside first-level fields (e.g. sharing settings)", () => {
@@ -293,7 +295,10 @@ describe("BuildJsonPackageDependencyGraphUseCase", () => {
         };
 
         const index = indexJsonPackage(metadataPackage);
-        const group = requireFirst(index.entriesByType.categoryOptionGroups, "categoryOptionGroups");
+        const group = requireFirst(
+            index.entriesByType.categoryOptionGroups,
+            "categoryOptionGroups"
+        );
         const graph = buildJsonPackageDependencyGraph.execute(index, group.key);
 
         const selectedTypeNodes = graph.nodes.filter(node => node.type === "categoryOptionGroups");
@@ -301,7 +306,9 @@ describe("BuildJsonPackageDependencyGraphUseCase", () => {
         expect(selectedTypeNodes[0]?.id).toBe("cog1");
         expect(graph.groups.some(item => item.id === "json-type:categoryOptionGroups")).toBe(false);
 
-        const groupSetBand = graph.groups.find(item => item.id === "json-type:categoryOptionGroupSets");
+        const groupSetBand = graph.groups.find(
+            item => item.id === "json-type:categoryOptionGroupSets"
+        );
         expect(groupSetBand?.title).toBe("Category option group sets");
     });
 
@@ -388,7 +395,9 @@ describe("BuildJsonPackageDependencyGraphUseCase", () => {
 
         const index = indexJsonPackage(metadataPackage);
         const dataElement = requireFirst(index.entriesByType.dataElements, "dataElements");
-        const graph = buildJsonPackageDependencyGraph.execute(index, dataElement.key, { mode: "direct" });
+        const graph = buildJsonPackageDependencyGraph.execute(index, dataElement.key, {
+            mode: "direct",
+        });
 
         const comboIds = graph.nodes
             .filter(node => node.type === "categoryCombos")

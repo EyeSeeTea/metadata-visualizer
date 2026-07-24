@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: i18next-conv\n"
-"POT-Creation-Date: 2026-04-14T15:22:40.054Z\n"
+"POT-Creation-Date: 2026-07-23T08:44:10.330Z\n"
 "PO-Revision-Date: 2018-10-25T09:02:35.143Z\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -139,15 +139,6 @@ msgstr ""
 msgid "Expanded"
 msgstr ""
 
-msgid "Relationships"
-msgstr ""
-
-msgid "Direct only"
-msgstr ""
-
-msgid "Expanded"
-msgstr ""
-
 msgid "Select a row to view dependencies"
 msgstr ""
 
@@ -187,53 +178,52 @@ msgstr ""
 msgid "Next"
 msgstr "Siguiente"
 
-msgid "UID"
-msgstr ""
+msgid "Organisation Unit UIDs"
+msgstr "UIDs de unidades organizativas"
 
-msgid "Name"
-msgstr ""
+msgid "Paste UIDs separated by spaces, commas or new lines"
+msgstr "Pega los UIDs separados por espacios, comas o saltos de línea"
 
-msgid "Short name"
-msgstr ""
+msgid "No organisation units found for the provided UIDs"
+msgstr "No se encontraron unidades organizativas para los UIDs indicados"
 
-msgid "Level"
-msgstr ""
+msgid "Expand geographic panel"
+msgstr "Expandir panel geográfico"
 
-msgid "Parent"
-msgstr ""
-
-msgid "Opening date"
-msgstr ""
-
-msgid "Closed date"
-msgstr ""
-
-msgid "Latitude"
-msgstr ""
-
-msgid "Longitude"
-msgstr ""
-
-msgid "Path"
-msgstr ""
-
-msgid "Path (UIDs)"
-msgstr ""
-
-msgid "Path (names)"
-msgstr ""
-
-msgid "Path (short names)"
-msgstr ""
-
-msgid "Organisation Unit UID"
-msgstr ""
+msgid "Map"
+msgstr "Mapa"
 
 msgid "Geographic preview"
-msgstr ""
+msgstr "Vista geográfica"
 
-msgid "No geographic data available for this organisation unit"
+msgid "Collapse geographic panel"
+msgstr "Colapsar panel geográfico"
+
+msgid "Collapse"
+msgstr "Colapsar"
+
+msgid "No geographic data available for the selected organisation units"
 msgstr ""
+"No hay datos geográficos disponibles para las unidades organizativas "
+"seleccionadas"
+
+msgid "No coordinates"
+msgstr "Sin coordenadas"
+
+msgid "Name / UID"
+msgstr "Nombre / UID"
+
+msgid "Level"
+msgstr "Nivel"
+
+msgid "Coordinates"
+msgstr "Coordenadas"
+
+msgid "Sort by path"
+msgstr "Ordenar por ruta"
+
+msgid "Path"
+msgstr "Ruta"
 
 #~ msgid "item"
 #~ msgstr "elemento"

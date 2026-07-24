@@ -28,12 +28,18 @@ export type OrgUnitPathInfo = {
     path: string;
     pathWithNames: string;
     pathWithShortNames: string;
+    segments: ReadonlyArray<OrgUnitPathSegment>;
 };
 
 export type OrgUnitPathSegment = {
     id: Id;
     name: string;
     shortName: string;
+};
+
+export type OrgUnitWithPath = {
+    orgUnit: OrgUnit;
+    pathInfo: OrgUnitPathInfo;
 };
 
 export function extractIdsFromPath(path: string): Id[] {
@@ -44,15 +50,14 @@ export function buildPathInfo(path: string, segments: OrgUnitPathSegment[]): Org
     const ids = extractIdsFromPath(path);
     const segmentById = new Map(segments.map(s => [s.id, s]));
 
-    const pathWithNames = ids
-        .map(id => segmentById.get(id)?.name ?? id)
-        .join(" / ");
+    const orderedSegments = ids.map(
+        (id): OrgUnitPathSegment => segmentById.get(id) ?? { id, name: id, shortName: id }
+    );
 
-    const pathWithShortNames = ids
-        .map(id => segmentById.get(id)?.shortName ?? id)
-        .join(" / ");
+    const pathWithNames = orderedSegments.map(s => s.name).join(" / ");
+    const pathWithShortNames = orderedSegments.map(s => s.shortName).join(" / ");
 
-    return { path, pathWithNames, pathWithShortNames };
+    return { path, pathWithNames, pathWithShortNames, segments: orderedSegments };
 }
 
 export type LngLatCoord = [number, number];
@@ -68,9 +73,10 @@ export function extractPolygons(geometry: OrgUnitGeometry): LngLatCoord[][] {
     }
 }
 
-export function getGeographicCenter(
-    orgUnit: OrgUnit
-): { center: [number, number]; hasData: boolean } {
+export function getGeographicCenter(orgUnit: OrgUnit): {
+    center: [number, number];
+    hasData: boolean;
+} {
     const geometry = orgUnit.geometry;
     const coordinates = orgUnit.coordinates;
 

@@ -5,16 +5,18 @@ import { OrgUnit, OrgUnitPathSegment } from "$/domain/orgUnits/OrgUnit";
 import { OrgUnitRepository } from "$/domain/repositories/OrgUnitRepository";
 
 export class OrgUnitTestRepository implements OrgUnitRepository {
-    getById(_id: Id): FutureData<OrgUnit> {
-        return Future.success({
-            id: "testOrgUnit1",
-            name: "Test Org Unit",
-            shortName: "TestOU",
-            displayName: "Test Org Unit",
-            path: "/rootId/testOrgUnit1",
-            level: 2,
-            parent: { id: "rootId", name: "Root" },
-        });
+    getByIds(_ids: Id[]): FutureData<OrgUnit[]> {
+        return Future.success([
+            {
+                id: "testOrgUnit1",
+                name: "Test Org Unit",
+                shortName: "TestOU",
+                displayName: "Test Org Unit",
+                path: "/rootId/testOrgUnit1",
+                level: 2,
+                parent: { id: "rootId", name: "Root" },
+            },
+        ]);
     }
 
     getPathSegments(_ids: Id[]): FutureData<OrgUnitPathSegment[]> {

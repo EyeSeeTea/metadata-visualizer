@@ -174,9 +174,7 @@ const MetadataGraphView3D: React.FC<MetadataGraphView3DProps> = ({
                 nodeId="id"
                 linkSource="source"
                 linkTarget="target"
-                nodeLabel={node =>
-                    `${getMetadataTypeLabel(node.type)}: ${node.name}`
-                }
+                nodeLabel={node => `${getMetadataTypeLabel(node.type)}: ${node.name}`}
                 linkLabel={link => link.label}
                 nodeAutoColorBy={useTexture ? undefined : "type"}
                 backgroundColor="#0f172a"

@@ -15,8 +15,7 @@ import { BuildJsonPackageDependencyGraphUseCase } from "$/domain/usecases/metada
 import { BuildMetadataGraphUseCase } from "$/domain/usecases/metadata/BuildMetadataGraphUseCase";
 import { ListCategoryOptionCombosUseCase } from "$/domain/usecases/metadata/ListCategoryOptionCombosUseCase";
 import { ListMetadataUseCase } from "$/domain/usecases/metadata/ListMetadataUseCase";
-import { GetOrgUnitByIdUseCase } from "$/domain/usecases/orgUnits/GetOrgUnitByIdUseCase";
-import { GetOrgUnitPathInfoUseCase } from "$/domain/usecases/orgUnits/GetOrgUnitPathInfoUseCase";
+import { GetOrgUnitsWithPathsUseCase } from "$/domain/usecases/orgUnits/GetOrgUnitsWithPathsUseCase";
 import { GetUiLocaleUseCase } from "$/domain/usecases/system/GetUiLocaleUseCase";
 import { GetCurrentUserUseCase } from "$/domain/usecases/users/GetCurrentUserUseCase";
 
@@ -44,8 +43,7 @@ function getCompositionRoot(repositories: Repositories) {
             listCategoryOptionCombos: new ListCategoryOptionCombosUseCase(repositories),
         },
         orgUnits: {
-            getById: new GetOrgUnitByIdUseCase(repositories),
-            getPathInfo: new GetOrgUnitPathInfoUseCase(repositories),
+            getManyWithPaths: new GetOrgUnitsWithPathsUseCase(repositories),
         },
     };
 }

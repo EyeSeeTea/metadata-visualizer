@@ -5,16 +5,8 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"POT-Creation-Date: 2026-03-19T15:07:27.824Z\n"
-"PO-Revision-Date: 2026-03-19T15:07:27.824Z\n"
-
-msgid "Add"
-msgstr ""
-
-msgid "List"
-msgstr ""
-"POT-Creation-Date: 2026-04-14T15:22:40.054Z\n"
-"PO-Revision-Date: 2026-04-14T15:22:40.054Z\n"
+"POT-Creation-Date: 2026-07-23T08:44:10.330Z\n"
+"PO-Revision-Date: 2026-07-23T08:44:10.330Z\n"
 
 msgid "Select a row to view relationships."
 msgstr ""
@@ -186,50 +178,47 @@ msgstr ""
 msgid "Next"
 msgstr ""
 
-msgid "UID"
+msgid "Organisation Unit UIDs"
 msgstr ""
 
-msgid "Name"
+msgid "Paste UIDs separated by spaces, commas or new lines"
 msgstr ""
 
-msgid "Short name"
+msgid "No organisation units found for the provided UIDs"
 msgstr ""
 
-msgid "Level"
+msgid "Expand geographic panel"
 msgstr ""
 
-msgid "Parent"
-msgstr ""
-
-msgid "Opening date"
-msgstr ""
-
-msgid "Closed date"
-msgstr ""
-
-msgid "Latitude"
-msgstr ""
-
-msgid "Longitude"
-msgstr ""
-
-msgid "Path"
-msgstr ""
-
-msgid "Path (UIDs)"
-msgstr ""
-
-msgid "Path (names)"
-msgstr ""
-
-msgid "Path (short names)"
-msgstr ""
-
-msgid "Organisation Unit UID"
+msgid "Map"
 msgstr ""
 
 msgid "Geographic preview"
 msgstr ""
 
-msgid "No geographic data available for this organisation unit"
+msgid "Collapse geographic panel"
+msgstr ""
+
+msgid "Collapse"
+msgstr ""
+
+msgid "No geographic data available for the selected organisation units"
+msgstr ""
+
+msgid "No coordinates"
+msgstr ""
+
+msgid "Name / UID"
+msgstr ""
+
+msgid "Level"
+msgstr ""
+
+msgid "Coordinates"
+msgstr ""
+
+msgid "Sort by path"
+msgstr ""
+
+msgid "Path"
 msgstr ""

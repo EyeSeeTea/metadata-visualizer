@@ -3,6 +3,6 @@ import { Id } from "$/domain/entities/Ref";
 import { OrgUnit, OrgUnitPathSegment } from "$/domain/orgUnits/OrgUnit";
 
 export interface OrgUnitRepository {
-    getById(id: Id): FutureData<OrgUnit>;
+    getByIds(ids: Id[]): FutureData<OrgUnit[]>;
     getPathSegments(ids: Id[]): FutureData<OrgUnitPathSegment[]>;
 }

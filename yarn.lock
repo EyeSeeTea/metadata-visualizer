@@ -5982,6 +5982,7 @@ __metadata:
     expect-type: "npm:^0"
     husky: "npm:^7"
     jsdom: "npm:^29.0.2"
+    leaflet: "npm:^1.9.4"
     material-ui: "npm:0.20.2"
     md5.js: "npm:>=1"
     prettier: "npm:^2"

@@ -8,22 +8,32 @@ import { OrgUnitRepository } from "$/domain/repositories/OrgUnitRepository";
 export class OrgUnitDhis2Repository implements OrgUnitRepository {
     constructor(private dataEngine: DataEngine) {}
 
-    getById(id: Id): FutureData<OrgUnit> {
-        return promiseToFuture<OrgUnit>(signal =>
+    getByIds(ids: Id[]): FutureData<OrgUnit[]> {
+        if (ids.length === 0) {
+            return promiseToFuture(() => Promise.resolve([]));
+        }
+
+        const filter = `id:in:[${ids.join(",")}]`;
+
+        return promiseToFuture<OrgUnit[]>(signal =>
             this.dataEngine
                 .query(
                     {
-                        orgUnit: {
+                        orgUnits: {
                             resource: "organisationUnits",
-                            id,
                             params: {
                                 fields: orgUnitFields,
+                                filter,
+                                paging: false,
                             },
                         },
                     },
                     { signal }
                 )
-                .then(res => toOrgUnit((res as { orgUnit: Dhis2OrgUnit }).orgUnit))
+                .then(res => {
+                    const data = res as { orgUnits: { organisationUnits: Dhis2OrgUnit[] } };
+                    return data.orgUnits.organisationUnits.map(toOrgUnit);
+                })
         );
     }
 
