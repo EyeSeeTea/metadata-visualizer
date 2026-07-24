@@ -55,11 +55,7 @@ export type JsonTypeGraphPolicy = Readonly<{
 
 export const graphPolicyByCenterType: Readonly<Record<string, JsonTypeGraphPolicy>> = {
     attributes: {
-        relatedTypes: unique([
-            ...coreMetadataTypes,
-            ...securityMetadataTypes,
-            "attributes",
-        ]),
+        relatedTypes: unique([...coreMetadataTypes, ...securityMetadataTypes, "attributes"]),
     },
     categories: {
         relatedTypes: [
@@ -138,13 +134,7 @@ export const graphPolicyByCenterType: Readonly<Record<string, JsonTypeGraphPolic
         relatedTypes: ["indicators", "indicatorGroups", "visualizations", "maps", "dashboards"],
     },
     indicators: {
-        relatedTypes: [
-            "indicatorTypes",
-            "indicatorGroups",
-            "visualizations",
-            "maps",
-            "dashboards",
-        ],
+        relatedTypes: ["indicatorTypes", "indicatorGroups", "visualizations", "maps", "dashboards"],
     },
     legendSets: {
         relatedTypes: ["visualizations", "maps"],
@@ -291,19 +281,12 @@ export function indexJsonPackage(input: unknown): JsonPackageIndex {
     return { types, entriesByType, entriesByKey, refsByKey, incomingRefsByKey };
 }
 
-function createPackageEntry(
-    type: string,
-    item: unknown,
-    index: number
-): JsonPackageEntry | null {
+function createPackageEntry(type: string, item: unknown, index: number): JsonPackageEntry | null {
     if (!isRecord(item)) return null;
 
     const id = getString(item.id) || `${type}#${index + 1}`;
     const displayName =
-        getString(item.displayName) ||
-        getString(item.name) ||
-        getString(item.shortName) ||
-        id;
+        getString(item.displayName) || getString(item.name) || getString(item.shortName) || id;
 
     const baseKey = `${type}:${id}`;
     const key = `${baseKey}#${index}`;

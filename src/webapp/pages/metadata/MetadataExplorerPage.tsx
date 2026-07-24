@@ -13,6 +13,7 @@ import {
 import { MetadataTable } from "$/webapp/components/metadata/MetadataTable";
 import { MetadataGraphPanel } from "$/webapp/components/metadata/MetadataGraphPanel";
 import { JsonPackageExplorer } from "$/webapp/pages/metadata/JsonPackageExplorer";
+import { OrgUnitExplorerPage } from "$/webapp/pages/orgUnits/OrgUnitExplorerPage";
 import { useFuture } from "$/webapp/hooks/useFuture";
 import "./MetadataExplorerPage.css";
 
@@ -34,7 +35,7 @@ const initialQuery: MetadataQueryState = {
     paging: true,
 };
 
-type ExplorerTab = "instance" | "load";
+type ExplorerTab = "instance" | "load" | "orgUnits";
 
 export const MetadataExplorerPage: React.FC = () => {
     const { compositionRoot } = useAppContext();
@@ -115,13 +116,24 @@ export const MetadataExplorerPage: React.FC = () => {
                     role="tab"
                     aria-selected={activeTab === "load"}
                     className={
-                        activeTab === "load"
-                            ? "metadata-tab metadata-tab--active"
-                            : "metadata-tab"
+                        activeTab === "load" ? "metadata-tab metadata-tab--active" : "metadata-tab"
                     }
                     onClick={() => setActiveTab("load")}
                 >
                     {i18n.t("JSON Package")}
+                </button>
+                <button
+                    type="button"
+                    role="tab"
+                    aria-selected={activeTab === "orgUnits"}
+                    className={
+                        activeTab === "orgUnits"
+                            ? "metadata-tab metadata-tab--active"
+                            : "metadata-tab"
+                    }
+                    onClick={() => setActiveTab("orgUnits")}
+                >
+                    {i18n.t("OrgUnit Explorer")}
                 </button>
             </div>
 
@@ -205,7 +217,7 @@ export const MetadataExplorerPage: React.FC = () => {
                         </div>
                     </div>
                 </>
-            ) : (
+            ) : activeTab === "load" ? (
                 <div
                     className="metadata-import"
                     role="tabpanel"
@@ -213,6 +225,8 @@ export const MetadataExplorerPage: React.FC = () => {
                 >
                     <JsonPackageExplorer />
                 </div>
+            ) : (
+                <OrgUnitExplorerPage />
             )}
         </div>
     );

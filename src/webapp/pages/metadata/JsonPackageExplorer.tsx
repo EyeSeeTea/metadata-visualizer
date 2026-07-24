@@ -214,7 +214,9 @@ export const JsonPackageExplorer: React.FC = () => {
                                                             size={32}
                                                         />
                                                     </td>
-                                                    <td className="metadata-table__cell">{entry.id}</td>
+                                                    <td className="metadata-table__cell">
+                                                        {entry.id}
+                                                    </td>
                                                     <td className="metadata-table__cell">
                                                         {entry.displayName}
                                                     </td>
